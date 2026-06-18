@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { DevForgeEvents, LogPayload, MetricPayload } from "@devforge/event-bus";
+import { DevForgeEvents, LogPayload, MetricPayload, ApiRequestPayload, ApiResponsePayload } from "@devforge/event-bus";
 
 export default function Home() {
   const socketRef = useRef<Socket | null>(null);
@@ -10,6 +10,7 @@ export default function Home() {
   const [logs, setLogs] = useState<LogPayload[]>([]);
   const [metrics, setMetrics] = useState<MetricPayload | null>(null);
   const [isTriggering, setIsTriggering] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
 
   useEffect(() => {
     // Connect to NestJS WebSocket Gateway (port 4000)
@@ -36,6 +37,26 @@ export default function Home() {
       setMetrics(data);
     });
 
+    socketInstance.on(DevForgeEvents.API_REQUEST, (data: ApiRequestPayload) => {
+      const requestLog: LogPayload = {
+        service: "api-hub",
+        level: "info",
+        message: `📡 [API REQ] ${data.method} -> ${data.url} (ID: ${data.requestId})`,
+        timestamp: data.timestamp,
+      };
+      setLogs((prev) => [requestLog, ...prev].slice(0, 50));
+    });
+
+    socketInstance.on(DevForgeEvents.API_RESPONSE, (data: ApiResponsePayload) => {
+      const responseLog: LogPayload = {
+        service: "api-hub",
+        level: data.statusCode >= 400 ? "error" : "info",
+        message: `📥 [API RES] Status: ${data.statusCode} | Latency: ${data.latencyMs}ms (ID: ${data.requestId})`,
+        timestamp: data.timestamp,
+      };
+      setLogs((prev) => [responseLog, ...prev].slice(0, 50));
+    });
+
     socketRef.current = socketInstance;
 
     return () => {
@@ -53,6 +74,28 @@ export default function Home() {
       console.error("Failed to trigger mock event", err);
     } finally {
       setTimeout(() => setIsTriggering(false), 300);
+    }
+  };
+
+  const executeApiHubRequest = async () => {
+    setIsExecuting(true);
+    try {
+      const res = await fetch("http://localhost:4000/api/api-hub/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId: "00000000-0000-0000-0000-000000000000", // dummy uuid
+          method: "GET",
+          url: "https://httpbin.org/delay/1", // 1 second delay to test latency
+          headers: { "Accept": "application/json" }
+        })
+      });
+      const data = await res.json();
+      console.log("Execute API response:", data);
+    } catch (err) {
+      console.error("Failed to execute request", err);
+    } finally {
+      setIsExecuting(false);
     }
   };
 
@@ -108,16 +151,28 @@ export default function Home() {
               Listening in real-time to active process logs and resource metrics across the DevOS workspace.
             </p>
           </div>
-          <button
-            onClick={triggerMockEvent}
-            disabled={isTriggering}
-            className={`px-5 h-11 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-800 active:scale-95 text-white font-medium rounded-xl border border-violet-500/30 transition-all shadow-[0_0_20px_rgba(124,58,237,0.15)] flex items-center justify-center gap-2 cursor-pointer`}
-          >
-            {isTriggering ? (
-              <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            ) : null}
-            Trigger Mock Event
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={triggerMockEvent}
+              disabled={isTriggering}
+              className={`px-5 h-11 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800 active:scale-95 text-zinc-200 font-medium rounded-xl border border-zinc-700/50 transition-all flex items-center justify-center gap-2 cursor-pointer`}
+            >
+              {isTriggering ? (
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-zinc-200 border-t-transparent" />
+              ) : null}
+              Trigger Mock Event
+            </button>
+            <button
+              onClick={executeApiHubRequest}
+              disabled={isExecuting}
+              className={`px-5 h-11 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-800 active:scale-95 text-white font-medium rounded-xl border border-violet-500/30 transition-all shadow-[0_0_20px_rgba(124,58,237,0.15)] flex items-center justify-center gap-2 cursor-pointer`}
+            >
+              {isExecuting ? (
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : null}
+              Execute Real API Req (1s Delay)
+            </button>
+          </div>
         </section>
 
         {/* Grid Layout for Metrics & Logs */}

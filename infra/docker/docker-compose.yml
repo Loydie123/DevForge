@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: devforge-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: devforge
+      POSTGRES_PASSWORD: devforge_secure_pass_2026
+      POSTGRES_DB: devforge
+    volumes:
+      - devforge-db-data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: devforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - devforge-redis-data:/data
+    restart: always
+
+volumes:
+  devforge-db-data:
+  devforge-redis-data:

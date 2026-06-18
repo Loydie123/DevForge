@@ -12,7 +12,7 @@ export interface ApiRequestPayload {
   method: string;
   url: string;
   headers: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timestamp: number;
 }
 
@@ -20,14 +20,14 @@ export interface ApiResponsePayload {
   requestId: string;
   statusCode: number;
   latencyMs: number;
-  body?: any;
+  body?: unknown;
   timestamp: number;
 }
 
 export interface DbQueryPayload {
   queryId: string;
   sql: string;
-  params?: any[];
+  params?: unknown[];
   latencyMs: number;
   affectedRows?: number;
   timestamp: number;
@@ -45,7 +45,7 @@ export interface LogPayload {
   service: string;
   level: 'info' | 'warn' | 'error' | 'debug';
   message: string;
-  metadata?: any;
+  metadata?: unknown;
   timestamp: number;
 }
 

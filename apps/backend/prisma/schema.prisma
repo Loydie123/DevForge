@@ -1,0 +1,51 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Project {
+  id          String       @id @default(uuid())
+  name        String
+  framework   String
+  createdAt   DateTime     @default(now())
+  collections Collection[]
+  history     History[]
+}
+
+model Collection {
+  id          String         @id @default(uuid())
+  name        String
+  projectId   String
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requests    SavedRequest[]
+  createdAt   DateTime       @default(now())
+}
+
+model SavedRequest {
+  id           String     @id @default(uuid())
+  name         String
+  method       String     // GET, POST, PUT, DELETE, etc.
+  url          String
+  headers      String     // JSON serialized headers
+  body         String?    // JSON serialized body
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+}
+
+model History {
+  id         String   @id @default(uuid())
+  method     String
+  url        String
+  statusCode Int
+  latencyMs  Int
+  headers    String   // JSON serialized request headers
+  body       String?  // JSON serialized request body
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}

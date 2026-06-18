@@ -11,12 +11,15 @@ const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const event_bus_module_1 = require("./event-bus/event-bus.module");
+const prisma_module_1 = require("./prisma/prisma.module");
+const cache_module_1 = require("./cache/cache.module");
+const api_hub_module_1 = require("./api-hub/api-hub.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [event_bus_module_1.EventBusModule],
+        imports: [event_bus_module_1.EventBusModule, prisma_module_1.PrismaModule, cache_module_1.CacheModule, api_hub_module_1.ApiHubModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })
