@@ -126,4 +126,110 @@ export class ApiHubService {
 
     return collections;
   }
+
+  // --- Collections CRUD ---
+  async createCollection(projectId: string, name: string) {
+    const collection = await this.prisma.collection.create({
+      data: { name, projectId },
+    });
+    await this.invalidateProjectCollectionsCache(projectId);
+    return collection;
+  }
+
+  async deleteCollection(projectId: string, id: string) {
+    const deleted = await this.prisma.collection.delete({ where: { id } });
+    await this.invalidateProjectCollectionsCache(projectId);
+    return deleted;
+  }
+
+  // --- Saved Requests CRUD ---
+  async saveRequest(dto: {
+    collectionId: string;
+    name: string;
+    method: string;
+    url: string;
+    headers: string;
+    body?: string;
+  }) {
+    return this.prisma.savedRequest.create({ data: dto });
+  }
+
+  async updateSavedRequest(
+    id: string,
+    dto: {
+      name?: string;
+      method?: string;
+      url?: string;
+      headers?: string;
+      body?: string;
+    },
+  ) {
+    return this.prisma.savedRequest.update({
+      where: { id },
+      data: dto,
+    });
+  }
+
+  async deleteSavedRequest(id: string) {
+    return this.prisma.savedRequest.delete({ where: { id } });
+  }
+
+  // --- History Explorer ---
+  async getHistory(projectId: string) {
+    return this.prisma.history.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async deleteHistoryItem(id: string) {
+    return this.prisma.history.delete({ where: { id } });
+  }
+
+  async clearHistory(projectId: string) {
+    return this.prisma.history.deleteMany({ where: { projectId } });
+  }
+
+  // --- Environment Manager ---
+  async getEnvironments(projectId: string) {
+    return this.prisma.environment.findMany({ where: { projectId } });
+  }
+
+  async createEnvironment(
+    projectId: string,
+    name: string,
+    variables: Record<string, string>,
+  ) {
+    return this.prisma.environment.create({
+      data: {
+        name,
+        variables: JSON.stringify(variables),
+        projectId,
+      },
+    });
+  }
+
+  async updateEnvironment(
+    id: string,
+    name?: string,
+    variables?: Record<string, string>,
+  ) {
+    return this.prisma.environment.update({
+      where: { id },
+      data: {
+        name,
+        ...(variables && { variables: JSON.stringify(variables) }),
+      },
+    });
+  }
+
+  async deleteEnvironment(id: string) {
+    return this.prisma.environment.delete({ where: { id } });
+  }
+
+  // Helper to invalidate cache when collections change
+  private async invalidateProjectCollectionsCache(projectId: string) {
+    const cacheKey = `collections:project:${projectId}`;
+    await this.cacheManager.del(cacheKey);
+  }
 }

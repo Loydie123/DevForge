@@ -8,12 +8,22 @@ generator client {
 }
 
 model Project {
-  id          String       @id @default(uuid())
-  name        String
-  framework   String
-  createdAt   DateTime     @default(now())
-  collections Collection[]
-  history     History[]
+  id           String        @id @default(uuid())
+  name         String
+  framework    String
+  createdAt    DateTime      @default(now())
+  collections  Collection[]
+  history      History[]
+  environments Environment[]
+}
+
+model Environment {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Development", "Production"
+  variables String   // JSON string storing key-value pairs
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model Collection {
