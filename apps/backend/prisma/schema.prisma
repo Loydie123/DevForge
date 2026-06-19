@@ -20,6 +20,7 @@ model Project {
   logSources    LogSource[]    // Relation to watched log sources
   userId        String?
   user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uptimeChecks  UptimeCheck[]  // Relation to Uptime checks
 }
 
 model Environment {
@@ -120,4 +121,28 @@ model User {
   role      String    @default("developer") // "admin" | "developer"
   projects  Project[]
   createdAt DateTime  @default(now())
+}
+
+model UptimeCheck {
+  id        String         @id @default(uuid())
+  name      String
+  url       String
+  interval  Int            @default(60) // check interval in seconds
+  status    String         @default("unknown") // "up" | "down" | "unknown"
+  latencyMs Int?
+  projectId String
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  results   UptimeResult[]
+  createdAt DateTime       @default(now())
+}
+
+model UptimeResult {
+  id            String      @id @default(uuid())
+  statusCode    Int?
+  latencyMs     Int
+  status        String      // "up" | "down"
+  error         String?
+  uptimeCheckId String
+  uptimeCheck   UptimeCheck @relation(fields: [uptimeCheckId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
 }

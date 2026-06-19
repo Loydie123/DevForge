@@ -9,6 +9,7 @@ import { DbHubModule } from './db-hub/db-hub.module';
 import { LogsHubModule } from './logs-hub/logs-hub.module';
 import { DevOpsModule } from './devops/devops.module';
 import { AuthModule } from './auth/auth.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
     LogsHubModule,
     DevOpsModule,
     AuthModule,
+    MonitoringModule,
   ],
   controllers: [AppController],
   providers: [AppService],
