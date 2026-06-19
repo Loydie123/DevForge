@@ -8,13 +8,14 @@ generator client {
 }
 
 model Project {
-  id           String        @id @default(uuid())
-  name         String
-  framework    String
-  createdAt    DateTime      @default(now())
-  collections  Collection[]
-  history      History[]
-  environments Environment[]
+  id            String         @id @default(uuid())
+  name          String
+  framework     String
+  createdAt     DateTime       @default(now())
+  collections   Collection[]
+  history       History[]
+  environments  Environment[]
+  dbConnections DbConnection[] // Relation to DB connections
 }
 
 model Environment {
@@ -58,4 +59,31 @@ model History {
   projectId  String
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
+}
+
+model DbConnection {
+  id           String           @id @default(uuid())
+  name         String           // e.g., "Local Postgres", "Prod Mongo"
+  type         String           // "postgres" | "mysql" | "mongodb"
+  host         String
+  port         Int
+  database     String
+  username     String
+  password     String
+  projectId    String
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  queryHistory DbQueryHistory[]
+  createdAt    DateTime         @default(now())
+}
+
+model DbQueryHistory {
+  id           String       @id @default(uuid())
+  query        String       // SQL statement or Mongo command string
+  latencyMs    Int
+  status       String       // "success" | "error"
+  error        String?      // Error message if query failed
+  rowsCount    Int?         // Number of rows returned/affected
+  connectionId String
+  connection   DbConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
 }
