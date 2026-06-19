@@ -1,12 +1,14 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const projectId = '00000000-0000-0000-0000-000000000000';
+  const adminEmail = 'admin@devforge.com';
+  const devEmail = 'dev@devforge.com';
 
-  // 1. Clean existing seed-related data to avoid duplicate key errors on multiple runs
-  // Note: onDelete: Cascade will clean up dependent collections, saved requests, history, and environments.
+  // 1. Clean existing seed-related data
   try {
     await prisma.project.delete({
       where: { id: projectId },
@@ -16,18 +18,51 @@ async function main() {
     // Project might not exist yet, ignore error
   }
 
-  // 2. Upsert default project
+  try {
+    await prisma.user.deleteMany({
+      where: { email: { in: [adminEmail, devEmail] } },
+    });
+    console.log('Cleared existing seeded user data.');
+  } catch (error) {
+    // Users might not exist yet, ignore error
+  }
+
+  // 2. Create Users
+  const adminPasswordHash = await bcrypt.hash('admin123', 10);
+  const admin = await prisma.user.create({
+    data: {
+      email: adminEmail,
+      password: adminPasswordHash,
+      name: 'DevForge Admin',
+      role: 'admin',
+    },
+  });
+
+  const devPasswordHash = await bcrypt.hash('dev123', 10);
+  const dev = await prisma.user.create({
+    data: {
+      email: devEmail,
+      password: devPasswordHash,
+      name: 'DevForge Developer',
+      role: 'developer',
+    },
+  });
+
+  console.log(`Seeded users: Admin (${admin.email}), Developer (${dev.email})`);
+
+  // 3. Create Default Project linked to Admin
   const project = await prisma.project.create({
     data: {
       id: projectId,
       name: 'Default DevForge Project',
       framework: 'Next.js',
+      userId: admin.id,
     },
   });
 
-  console.log(`Seeded project: ${project.name} (${project.id})`);
+  console.log(`Seeded project: ${project.name} (${project.id}) linked to user ${admin.email}`);
 
-  // 3. Seed environments
+  // 4. Seed environments
   const devEnv = await prisma.environment.create({
     data: {
       name: 'Development',
@@ -54,7 +89,7 @@ async function main() {
 
   console.log(`Seeded environments: ${devEnv.name}, ${prodEnv.name}`);
 
-  // 4. Seed a default collection
+  // 5. Seed a default collection
   const collection = await prisma.collection.create({
     data: {
       name: 'JSONPlaceholder Demo',
@@ -62,7 +97,7 @@ async function main() {
     },
   });
 
-  // 5. Seed some saved requests in the collection
+  // 6. Seed some saved requests in the collection
   const request1 = await prisma.savedRequest.create({
     data: {
       name: 'Get All Users',

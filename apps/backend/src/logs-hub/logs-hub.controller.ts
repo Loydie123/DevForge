@@ -7,9 +7,12 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { LogsHubService } from './logs-hub.service';
+import { AuthGuard } from '../auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('logs-hub')
 export class LogsHubController {
   constructor(private readonly logsHubService: LogsHubService) {}

@@ -7,9 +7,12 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { DbHubService } from './db-hub.service';
+import { AuthGuard } from '../auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('db-hub')
 export class DbHubController {
   constructor(private readonly dbHubService: DbHubService) {}

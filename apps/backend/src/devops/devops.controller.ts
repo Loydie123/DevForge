@@ -6,9 +6,12 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { DevOpsService, DockerContainer, DockerStats } from './devops.service';
+import { AuthGuard } from '../auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('devops')
 export class DevOpsController {
   constructor(private readonly devOpsService: DevOpsService) {}

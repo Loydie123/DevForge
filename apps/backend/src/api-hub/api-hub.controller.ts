@@ -6,9 +6,12 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiHubService } from './api-hub.service';
+import { AuthGuard } from '../auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('api-hub')
 export class ApiHubController {
   constructor(private readonly apiHubService: ApiHubService) {}

@@ -8,6 +8,7 @@ import { ApiHubModule } from './api-hub/api-hub.module';
 import { DbHubModule } from './db-hub/db-hub.module';
 import { LogsHubModule } from './logs-hub/logs-hub.module';
 import { DevOpsModule } from './devops/devops.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DevOpsModule } from './devops/devops.module';
     DbHubModule,
     LogsHubModule,
     DevOpsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
