@@ -16,6 +16,8 @@ model Project {
   history       History[]
   environments  Environment[]
   dbConnections DbConnection[] // Relation to DB connections
+  errorLogs     ErrorLog[]     // Relation to exception logs
+  logSources    LogSource[]    // Relation to watched log sources
 }
 
 model Environment {
@@ -86,4 +88,24 @@ model DbQueryHistory {
   connectionId String
   connection   DbConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   createdAt    DateTime     @default(now())
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  service   String   // e.g., "backend", "frontend", "event-bus"
+  message   String
+  stack     String?  @db.Text
+  severity  String   // "low" | "medium" | "high" | "critical"
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model LogSource {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Nginx Access Log", "Next.js Build Log"
+  filePath  String   // Absolute path on disk
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

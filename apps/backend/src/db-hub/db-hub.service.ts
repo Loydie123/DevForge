@@ -209,7 +209,7 @@ export class DbHubService {
             resultPayload = rows;
           } else {
             // For INSERT/UPDATE/DELETE statement responses (ResultSetHeader)
-            const header = rows as Record<string, unknown>;
+            const header = rows as unknown as Record<string, unknown>;
             rowsCount =
               typeof header.affectedRows === 'number' ? header.affectedRows : 0;
             resultPayload = rows;

@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CacheModule } from './cache/cache.module';
 import { ApiHubModule } from './api-hub/api-hub.module';
 import { DbHubModule } from './db-hub/db-hub.module';
+import { LogsHubModule } from './logs-hub/logs-hub.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DbHubModule } from './db-hub/db-hub.module';
     CacheModule,
     ApiHubModule,
     DbHubModule,
+    LogsHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],
