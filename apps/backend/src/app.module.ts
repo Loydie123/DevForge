@@ -7,6 +7,7 @@ import { CacheModule } from './cache/cache.module';
 import { ApiHubModule } from './api-hub/api-hub.module';
 import { DbHubModule } from './db-hub/db-hub.module';
 import { LogsHubModule } from './logs-hub/logs-hub.module';
+import { DevOpsModule } from './devops/devops.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LogsHubModule } from './logs-hub/logs-hub.module';
     ApiHubModule,
     DbHubModule,
     LogsHubModule,
+    DevOpsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
