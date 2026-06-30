@@ -1,7 +1,7 @@
 "use client";
 
 // Custom Hook separating Business Logic
-import useDashboard from "../_hooks/use-dashboard";
+import { useDashboard } from "../../hooks";
 
 // Global Shared Components
 import Header from "../../components/header";

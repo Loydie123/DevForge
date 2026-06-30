@@ -1,38 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: #111827; /* Dark base charcoal */
+  --foreground: #F3F4F6; /* User's Soft Gray */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   
-  --font-sans: 'Fira Sans', sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   
-  /* Slate theme palette values */
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  --color-slate-950: #020617;
+  /* Map slate theme values using user's Charcoal (#1F2937) and Soft Gray (#F3F4F6) */
+  --color-slate-50: #FFFFFF;
+  --color-slate-100: #F9FAFB;
+  --color-slate-200: #F3F4F6; /* User's Soft Gray */
+  --color-slate-300: #E5E7EB;
+  --color-slate-400: #D1D5DB; /* Muted Soft Gray */
+  --color-slate-500: #9CA3AF;
+  --color-slate-600: #4B5563;
+  --color-slate-700: #374151; /* Dark Gray border */
+  --color-slate-800: #374151; /* Border */
+  --color-slate-900: #1F2937; /* User's Charcoal (Cards & Navs) */
+  --color-slate-950: #111827; /* Dark Base Charcoal (Page Background) */
   
-  /* Status green accent */
-  --color-emerald-500: #10b981;
-  --color-emerald-600: #059669;
+  /* Map emerald/teal accents using user's Lime (#A3E635) */
+  --color-emerald-400: #BEF264; /* Light Lime */
+  --color-emerald-500: #A3E635; /* User's Lime Accent */
+  --color-emerald-600: #84CC16; /* Medium Lime */
+  --color-emerald-700: #65A30D; /* Dark Lime */
+  
+  --color-teal-400: #BEF264;
+  --color-teal-500: #A3E635;
+  --color-teal-600: #84CC16;
+  --color-teal-700: #65A30D;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Fira Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
 }

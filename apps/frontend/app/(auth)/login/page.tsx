@@ -1,49 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLogin } from "../../../hooks";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem("devforge_token")) {
-      router.push("/");
-    }
-  }, [router]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to log in.");
-      }
-
-      localStorage.setItem("devforge_token", data.token);
-      router.push("/");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export default function Login() {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    isLoading,
+    handleLogin,
+  } = useLogin();
 
   return (
     <div className="h-screen w-full flex bg-slate-950 text-slate-100 font-sans relative overflow-hidden select-none">
@@ -52,7 +21,7 @@ export default function LoginPage() {
 
       {/* Ambient Glowing Light Orbs */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-slate-700/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* 50/50 Layout Wrapper */}
       <div className="flex w-full h-full z-10">
@@ -91,7 +60,7 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     required
-                    placeholder="developer@devforge.com"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-10 px-3.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs text-white placeholder-slate-600 transition-all"
@@ -104,7 +73,7 @@ export default function LoginPage() {
                     id="password"
                     type="password"
                     required
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-10 px-3.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs text-white placeholder-slate-600 transition-all"
@@ -178,26 +147,20 @@ export default function LoginPage() {
                   <span>🐳 Docker containers daemon</span>
                   <span className="text-emerald-400 font-bold">4 RUNNING</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-400 border-t border-slate-800/60 pt-2.5 mt-1">
-                  <span>API Latency</span>
-                  <span className="text-emerald-400 font-bold">12ms (Optimal)</span>
+                
+                {/* Visual CLI pulse animation */}
+                <div className="flex items-center gap-2 mt-2 text-emerald-500 animate-pulse">
+                  <span>&gt;</span>
+                  <span>System metrics streaming active. Monitoring port 4000...</span>
                 </div>
               </div>
-            </div>
-
-            {/* Sub-description */}
-            <div className="text-center flex flex-col gap-2 max-w-sm mx-auto">
-              <h3 className="text-base font-mono font-bold text-white tracking-tight">Universal Developer OS</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Streamline development workflows: query database consoles, watch logs, manage containers, and track exceptions in one interface.
-              </p>
             </div>
           </div>
 
           {/* Footer details */}
-          <div className="flex items-center justify-between text-[10px] text-slate-600 font-mono z-10">
-            <span>© 2026 DevForge</span>
-            <span>v0.1.0</span>
+          <div className="flex items-center justify-between z-10 text-[10px] font-mono text-slate-600">
+            <span>© 2026 DEVFORGE INC.</span>
+            <span>OS: DEVOS v0.1.0</span>
           </div>
         </div>
 

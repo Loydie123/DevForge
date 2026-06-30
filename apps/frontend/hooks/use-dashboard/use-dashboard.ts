@@ -11,6 +11,10 @@ import {
   ApiResponsePayload,
 } from "@devforge/event-bus";
 
+import { authService } from "../../services/auth-service";
+import { apiService } from "../../services/api-service";
+import { WS_GATEWAY_URL, TOKEN_KEY } from "../../config/env";
+
 export default function useDashboard() {
   const router = useRouter();
   const socketRef = useRef<Socket | null>(null);
@@ -23,7 +27,7 @@ export default function useDashboard() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("devforge_token");
+    const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
       router.push("/login");
       return;
@@ -31,20 +35,12 @@ export default function useDashboard() {
 
     const loadProfileAndSockets = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) {
-          throw new Error("Invalid or expired session.");
-        }
-
-        const profile = await res.json();
+        const profile = await authService.getProfile(token);
         setUser(profile);
         setIsAuthLoading(false);
 
         // Connect to NestJS WebSocket Gateway with auth token
-        const socketInstance = io("http://localhost:4000", {
+        const socketInstance = io(WS_GATEWAY_URL, {
           transports: ["websocket"],
           auth: { token },
         });
@@ -91,7 +87,7 @@ export default function useDashboard() {
         socketRef.current = socketInstance;
       } catch (err) {
         console.error("Auth initialization failed:", err);
-        localStorage.removeItem("devforge_token");
+        localStorage.removeItem(TOKEN_KEY);
         router.push("/login");
       }
     };
@@ -108,9 +104,7 @@ export default function useDashboard() {
   const triggerMockEvent = async () => {
     setIsTriggering(true);
     try {
-      const res = await fetch("http://localhost:4000/api/trigger-mock");
-      const data = await res.json();
-      console.log("Mock trigger response:", data);
+      await apiService.triggerMockEvent();
     } catch (err) {
       console.error("Failed to trigger mock event", err);
     } finally {
@@ -121,22 +115,8 @@ export default function useDashboard() {
   const executeApiHubRequest = async () => {
     setIsExecuting(true);
     try {
-      const token = localStorage.getItem("devforge_token") || "";
-      const res = await fetch("http://localhost:4000/api/api-hub/execute", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          projectId: "00000000-0000-0000-0000-000000000000",
-          method: "GET",
-          url: "https://httpbin.org/delay/1",
-          headers: { Accept: "application/json" },
-        }),
-      });
-      const data = await res.json();
-      console.log("Execute API response:", data);
+      const token = localStorage.getItem(TOKEN_KEY) || "";
+      await apiService.executeApiHubRequest(token);
     } catch (err) {
       console.error("Failed to execute request", err);
     } finally {
@@ -145,7 +125,7 @@ export default function useDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("devforge_token");
+    localStorage.removeItem(TOKEN_KEY);
     router.push("/login");
   };
 
