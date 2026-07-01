@@ -1,43 +1,19 @@
-import { API_BASE_URL } from "../config/env";
+import { apiClient } from "./api-client";
 
 export const authService = {
   async login(email: string, password: string) {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to log in.");
-    }
-    return data as { token: string };
+    const res = await apiClient.post<{ token: string }>("/auth/login", { email, password });
+    return res.data;
   },
 
   async register(name: string, email: string, password: string) {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to register.");
-    }
-    return data as { token: string };
+    const res = await apiClient.post<{ token: string }>("/auth/register", { name, email, password });
+    return res.data;
   },
 
-  async getProfile(token: string) {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to fetch user profile.");
-    }
-    return data as { email: string; role: string; name?: string };
+  async getProfile(token?: string) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+    const res = await apiClient.get<{ email: string; role: string; name?: string }>("/auth/me", { headers });
+    return res.data;
   }
 };

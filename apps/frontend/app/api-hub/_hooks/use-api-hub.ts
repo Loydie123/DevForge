@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   apiHubService, 
   SaveRequestDto, 
-  Collection, 
   HistoryItem, 
   SavedRequest 
 } from "../../../services/api-hub-service";
@@ -30,13 +30,7 @@ export interface ApiResponseData {
 
 export default function useApiHub() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; role: string; name?: string } | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-
-  // Lists
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isLoadingLists, setIsLoadingLists] = useState(false);
+  const queryClient = useQueryClient();
 
   // Active Composer State
   const [method, setMethod] = useState("GET");
@@ -44,8 +38,7 @@ export default function useApiHub() {
   const [headers, setHeaders] = useState<KeyValuePair[]>([{ key: "", value: "" }]);
   const [body, setBody] = useState("");
   
-  // Execution & Response State
-  const [isExecuting, setIsExecuting] = useState(false);
+  // Execution Output states
   const [response, setResponse] = useState<ApiResponseData | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
 
@@ -56,115 +49,165 @@ export default function useApiHub() {
 
   // Input states for creating entities
   const [newCollectionName, setNewCollectionName] = useState("");
-  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
 
-  const refreshSidebar = async (authToken: string) => {
-    setIsLoadingLists(true);
-    try {
-      const fetchedCollections = await apiHubService.getCollections(DEFAULT_PROJECT_ID, authToken);
-      setCollections(fetchedCollections);
-      
-      const fetchedHistory = await apiHubService.getHistory(DEFAULT_PROJECT_ID, authToken);
-      // Sort history: latest first
-      fetchedHistory.sort((a: HistoryItem, b: HistoryItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      setHistory(fetchedHistory);
-    } catch (err) {
-      console.error("Failed to load sidebar lists:", err);
-    } finally {
-      setIsLoadingLists(false);
-    }
-  };
+  // 1. Fetch User Profile via React Query
+  const { data: user, isLoading: isAuthLoading, error: authError } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: () => authService.getProfile(),
+    retry: false,
+    staleTime: Infinity,
+  });
 
+  // Handle auth redirection
   useEffect(() => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) {
+    if (authError) {
+      localStorage.removeItem(TOKEN_KEY);
       router.push("/login");
-      return;
     }
+  }, [authError, router]);
 
-    const initializeData = async () => {
-      try {
-        const profile = await authService.getProfile(activeToken);
-        setUser(profile);
-        setIsAuthLoading(false);
-        
-        // Load collections and history
-        await refreshSidebar(activeToken);
-      } catch (err) {
-        console.error("Initialization error:", err);
-        localStorage.removeItem(TOKEN_KEY);
-        router.push("/login");
-      }
-    };
-
-    void initializeData();
+  // Check token presence on mount
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
+      router.push("/login");
+    }
   }, [router]);
 
-  const handleCreateCollection = async () => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!newCollectionName.trim() || !activeToken) return;
-    setIsCreatingCollection(true);
-    try {
-      await apiHubService.createCollection(DEFAULT_PROJECT_ID, newCollectionName, activeToken);
+  // 2. Fetch Collections via React Query
+  const { data: collections = [], isLoading: isLoadingCollections } = useQuery({
+    queryKey: ["collections"],
+    queryFn: () => apiHubService.getCollections(DEFAULT_PROJECT_ID),
+    enabled: !!user,
+  });
+
+  // 3. Fetch History via React Query
+  const { data: historyList = [], isLoading: isLoadingHistory } = useQuery({
+    queryKey: ["api-history"],
+    queryFn: () => apiHubService.getHistory(DEFAULT_PROJECT_ID),
+    enabled: !!user,
+  });
+
+  // Sort history: latest first
+  const sortedHistory = [...historyList].sort(
+    (a: HistoryItem, b: HistoryItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
+  // 4. Create Collection Mutation
+  const createColMutation = useMutation({
+    mutationFn: () => apiHubService.createCollection(DEFAULT_PROJECT_ID, newCollectionName),
+    onSuccess: () => {
       setNewCollectionName("");
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      console.error("Failed to create collection:", err);
-    } finally {
-      setIsCreatingCollection(false);
+      void queryClient.invalidateQueries({ queryKey: ["collections"] });
+    },
+    onError: (err) => {
+      console.error("Failed to create collection:", err.message);
     }
-  };
+  });
 
-  const handleDeleteCollection = async (id: string) => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) return;
-    try {
-      await apiHubService.deleteCollection(DEFAULT_PROJECT_ID, id, activeToken);
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      console.error("Failed to delete collection:", err);
+  // 5. Delete Collection Mutation
+  const deleteColMutation = useMutation({
+    mutationFn: (id: string) => apiHubService.deleteCollection(DEFAULT_PROJECT_ID, id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["collections"] });
+    },
+    onError: (err) => {
+      console.error("Failed to delete collection:", err.message);
     }
-  };
+  });
 
-  const handleSaveRequest = async (collectionId: string, name: string) => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) return;
-    
-    // Parse headers key-value array into JSON string
-    const headersDict: Record<string, string> = {};
-    headers.forEach(h => {
-      if (h.key.trim()) {
-        headersDict[h.key.trim()] = h.value;
+  // 6. Save Request Mutation
+  const saveReqMutation = useMutation({
+    mutationFn: ({ collectionId, name }: { collectionId: string; name: string }) => {
+      const headersDict: Record<string, string> = {};
+      headers.forEach(h => {
+        if (h.key.trim()) {
+          headersDict[h.key.trim()] = h.value;
+        }
+      });
+
+      const dto: SaveRequestDto = {
+        collectionId,
+        name: name || "New Saved Request",
+        method,
+        url,
+        headers: JSON.stringify(headersDict),
+        body: body || undefined
+      };
+      return apiHubService.saveRequest(dto);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["collections"] });
+    },
+    onError: (err) => {
+      console.error("Failed to save request:", err.message);
+    }
+  });
+
+  // 7. Delete Request Mutation
+  const deleteReqMutation = useMutation({
+    mutationFn: (id: string) => apiHubService.deleteRequest(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["collections"] });
+    },
+    onError: (err) => {
+      console.error("Failed to delete request:", err.message);
+    }
+  });
+
+  // 8. Clear History Mutation
+  const clearHistoryMutation = useMutation({
+    mutationFn: () => apiHubService.clearHistory(DEFAULT_PROJECT_ID),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["api-history"] });
+    },
+    onError: (err) => {
+      console.error("Failed to clear history:", err.message);
+    }
+  });
+
+  // 9. Execute Request Mutation
+  const runReqMutation = useMutation({
+    mutationFn: () => {
+      const headersDict: Record<string, string> = {};
+      headers.forEach(h => {
+        if (h.key.trim()) {
+          headersDict[h.key.trim()] = h.value;
+        }
+      });
+
+      let parsedBody: unknown = undefined;
+      if (body.trim()) {
+        try {
+          parsedBody = JSON.parse(body.trim());
+        } catch {
+          parsedBody = body; // fallback to raw string
+        }
       }
-    });
 
-    const dto: SaveRequestDto = {
-      collectionId,
-      name: name || "New Saved Request",
-      method,
-      url,
-      headers: JSON.stringify(headersDict),
-      body: body || undefined
-    };
-
-    try {
-      await apiHubService.saveRequest(dto, activeToken);
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      console.error("Failed to save request:", err);
+      return apiHubService.execute({
+        projectId: DEFAULT_PROJECT_ID,
+        method,
+        url,
+        headers: headersDict,
+        body: parsedBody
+      });
+    },
+    onSuccess: (resData) => {
+      setResponse({
+        status: resData.status,
+        statusText: getStatusText(resData.status),
+        latencyMs: resData.latencyMs,
+        sizeBytes: resData.sizeBytes || 0,
+        body: typeof resData.body === 'object' ? JSON.stringify(resData.body, null, 2) : String(resData.body),
+        headers: resData.headers || {}
+      });
+      void queryClient.invalidateQueries({ queryKey: ["api-history"] });
+    },
+    onError: (err) => {
+      setExecutionError(err.message);
     }
-  };
-
-  const handleDeleteRequest = async (id: string) => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) return;
-    try {
-      await apiHubService.deleteRequest(id, activeToken);
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      console.error("Failed to delete request:", err);
-    }
-  };
+  });
 
   const loadSavedRequestIntoComposer = (req: SavedRequest) => {
     setMethod(req.method);
@@ -201,76 +244,12 @@ export default function useApiHub() {
     }
   };
 
-  const handleClearHistory = async () => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) return;
-    try {
-      await apiHubService.clearHistory(DEFAULT_PROJECT_ID, activeToken);
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      console.error("Failed to clear history:", err);
-    }
-  };
-
-  const handleSendRequest = async () => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!url.trim() || !activeToken) return;
-    setIsExecuting(true);
-    setResponse(null);
-    setExecutionError(null);
-
-    // Convert key-value headers to Record dictionary
-    const headersDict: Record<string, string> = {};
-    headers.forEach(h => {
-      if (h.key.trim()) {
-        headersDict[h.key.trim()] = h.value;
-      }
-    });
-
-    // Parse body if it exists
-    let parsedBody: unknown = undefined;
-    if (body.trim()) {
-      try {
-        parsedBody = JSON.parse(body.trim());
-      } catch {
-        parsedBody = body; // fallback to raw string if not JSON
-      }
-    }
-
-    try {
-      const resData = await apiHubService.execute({
-        projectId: DEFAULT_PROJECT_ID,
-        method,
-        url,
-        headers: headersDict,
-        body: parsedBody
-      }, activeToken);
-
-      setResponse({
-        status: resData.status,
-        statusText: getStatusText(resData.status),
-        latencyMs: resData.latencyMs,
-        sizeBytes: resData.sizeBytes || 0,
-        body: typeof resData.body === 'object' ? JSON.stringify(resData.body, null, 2) : String(resData.body),
-        headers: resData.headers || {}
-      });
-
-      // Reload sidebar to reflect new history item
-      await refreshSidebar(activeToken);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Request failed.";
-      setExecutionError(message);
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem(TOKEN_KEY);
+    queryClient.clear();
     router.push("/login");
   };
 
-  // Helper status texts
   const getStatusText = (code: number) => {
     const statuses: Record<number, string> = {
       200: "OK",
@@ -290,11 +269,11 @@ export default function useApiHub() {
   };
 
   return {
-    user,
+    user: user || null,
     isAuthLoading,
     collections,
-    history,
-    isLoadingLists,
+    history: sortedHistory,
+    isLoadingLists: isLoadingCollections || isLoadingHistory,
     
     // Request composer state
     method,
@@ -306,11 +285,15 @@ export default function useApiHub() {
     body,
     setBody,
     
-    // Actions & Senders
-    isExecuting,
+    // Actions
+    isExecuting: runReqMutation.isPending,
     response,
     executionError,
-    handleSendRequest,
+    handleSendRequest: () => {
+      setResponse(null);
+      setExecutionError(null);
+      runReqMutation.mutate();
+    },
     
     // UI tabs
     composerTab,
@@ -323,16 +306,16 @@ export default function useApiHub() {
     // Collections Management
     newCollectionName,
     setNewCollectionName,
-    isCreatingCollection,
-    handleCreateCollection,
-    handleDeleteCollection,
-    handleSaveRequest,
-    handleDeleteRequest,
+    isCreatingCollection: createColMutation.isPending,
+    handleCreateCollection: () => createColMutation.mutate(),
+    handleDeleteCollection: (id: string) => deleteColMutation.mutate(id),
+    handleSaveRequest: (collectionId: string, name: string) => saveReqMutation.mutate({ collectionId, name }),
+    handleDeleteRequest: (id: string) => deleteReqMutation.mutate(id),
     
     // Loader actions
     loadSavedRequestIntoComposer,
     loadHistoryItemIntoComposer,
-    handleClearHistory,
+    handleClearHistory: () => clearHistoryMutation.mutate(),
     handleLogout
   };
 }

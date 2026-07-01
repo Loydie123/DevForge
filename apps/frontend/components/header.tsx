@@ -36,6 +36,9 @@ export default function Header({ isConnected, user, onLogout }: HeaderProps) {
             <Link href="/api-hub" className="hover:text-emerald-400 transition-colors">
               API Hub
             </Link>
+            <Link href="/db-hub" className="hover:text-emerald-400 transition-colors">
+              DB Hub
+            </Link>
           </nav>
         </div>
 

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config/env";
+import { apiClient } from "./api-client";
 
 export interface SavedRequest {
   id: string;
@@ -35,6 +35,14 @@ export interface ExecuteRequestDto {
   body?: unknown;
 }
 
+export interface RequestExecutionResult {
+  status: number;
+  latencyMs: number;
+  sizeBytes?: number;
+  body: unknown;
+  headers?: Record<string, string>;
+}
+
 export interface SaveRequestDto {
   collectionId: string;
   name: string;
@@ -45,125 +53,48 @@ export interface SaveRequestDto {
 }
 
 export const apiHubService = {
-  async execute(dto: ExecuteRequestDto, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/execute`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(dto),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to execute request.");
-    }
-    return data;
+  async execute(dto: ExecuteRequestDto): Promise<RequestExecutionResult> {
+    const res = await apiClient.post<RequestExecutionResult>("/api-hub/execute", dto);
+    return res.data;
   },
 
-  async getCollections(projectId: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/collections/${projectId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to fetch collections.");
-    }
-    return data;
+  async getCollections(projectId: string) {
+    const res = await apiClient.get<Collection[]>(`/api-hub/collections/${projectId}`);
+    return res.data;
   },
 
-  async createCollection(projectId: string, name: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/collections`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ projectId, name }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to create collection.");
-    }
-    return data;
+  async createCollection(projectId: string, name: string) {
+    const res = await apiClient.post<Collection>("/api-hub/collections", { projectId, name });
+    return res.data;
   },
 
-  async deleteCollection(projectId: string, id: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/collections/${projectId}/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to delete collection.");
-    }
-    return data;
+  async deleteCollection(projectId: string, id: string) {
+    const res = await apiClient.delete<void>(`/api-hub/collections/${projectId}/${id}`);
+    return res.data;
   },
 
-  async saveRequest(dto: SaveRequestDto, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/requests`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(dto),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to save request.");
-    }
-    return data;
+  async saveRequest(dto: SaveRequestDto) {
+    const res = await apiClient.post<SavedRequest>("/api-hub/requests", dto);
+    return res.data;
   },
 
-  async updateRequest(id: string, dto: Partial<SaveRequestDto>, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/requests/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(dto),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to update request.");
-    }
-    return data;
+  async updateRequest(id: string, dto: Partial<SaveRequestDto>) {
+    const res = await apiClient.put<SavedRequest>(`/api-hub/requests/${id}`, dto);
+    return res.data;
   },
 
-  async deleteRequest(id: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/requests/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to delete request.");
-    }
-    return data;
+  async deleteRequest(id: string) {
+    const res = await apiClient.delete<void>(`/api-hub/requests/${id}`);
+    return res.data;
   },
 
-  async getHistory(projectId: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/history/${projectId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to fetch history.");
-    }
-    return data;
+  async getHistory(projectId: string) {
+    const res = await apiClient.get<HistoryItem[]>(`/api-hub/history/${projectId}`);
+    return res.data;
   },
 
-  async clearHistory(projectId: string, token: string) {
-    const res = await fetch(`${API_BASE_URL}/api-hub/history/clear/${projectId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to clear history.");
-    }
-    return data;
+  async clearHistory(projectId: string) {
+    const res = await apiClient.delete<void>(`/api-hub/history/clear/${projectId}`);
+    return res.data;
   }
 };
