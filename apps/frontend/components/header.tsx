@@ -42,6 +42,9 @@ export default function Header({ isConnected, user, onLogout }: HeaderProps) {
             <Link href="/logs-hub" className="hover:text-emerald-400 transition-colors whitespace-nowrap">
               Logs Hub
             </Link>
+            <Link href="/devops-hub" className="hover:text-emerald-400 transition-colors whitespace-nowrap">
+              DevOps Hub
+            </Link>
           </nav>
         </div>
 
