@@ -10,6 +10,7 @@ import { LogsHubModule } from './logs-hub/logs-hub.module';
 import { DevOpsModule } from './devops/devops.module';
 import { AuthModule } from './auth/auth.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
     DevOpsModule,
     AuthModule,
     MonitoringModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

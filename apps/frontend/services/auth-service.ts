@@ -13,7 +13,7 @@ export const authService = {
 
   async getProfile(token?: string) {
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    const res = await apiClient.get<{ email: string; role: string; name?: string }>("/auth/me", { headers });
+    const res = await apiClient.get<{ id?: string; userId: string; email: string; role: string; name?: string }>("/auth/me", { headers });
     return res.data;
   }
 };

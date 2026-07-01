@@ -4,3 +4,4 @@ export { default as useRegister } from "./use-register/use-register";
 export { default as useDbHub } from "./use-db-hub/use-db-hub";
 export { default as useLogsHub } from "./use-logs-hub/use-logs-hub";
 export { default as useDevopsHub } from "./use-devops-hub/use-devops-hub";
+export { default as useAdmin } from "./use-admin/use-admin";
