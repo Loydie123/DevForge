@@ -43,7 +43,7 @@ export class AuthService {
         email: dto.email,
         password: passwordHash,
         name: dto.name,
-        role: dto.role || 'developer',
+        role: 'developer', // Enforce default developer role for security
       },
     });
 

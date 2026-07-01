@@ -10,7 +10,6 @@ export default function useRegister() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("developer");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,7 +19,7 @@ export default function useRegister() {
     setError(null);
 
     try {
-      const data = await authService.register(name, email, password, role);
+      const data = await authService.register(name, email, password);
       localStorage.setItem(TOKEN_KEY, data.token);
       router.push("/");
     } catch (err) {
@@ -38,8 +37,6 @@ export default function useRegister() {
     setEmail,
     password,
     setPassword,
-    role,
-    setRole,
     error,
     isLoading,
     handleRegister,

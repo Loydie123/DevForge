@@ -11,8 +11,6 @@ export default function Register() {
     setEmail,
     password,
     setPassword,
-    role,
-    setRole,
     error,
     isLoading,
     handleRegister,
@@ -95,19 +93,6 @@ export default function Register() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-9 px-3.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs text-white placeholder-slate-600 transition-all"
                   />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-mono font-bold text-slate-500 tracking-wider" htmlFor="role">ROLE</label>
-                  <select
-                    id="role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="h-9 px-3.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs text-white transition-all cursor-pointer"
-                  >
-                    <option value="developer">Developer</option>
-                    <option value="admin">Administrator</option>
-                  </select>
                 </div>
 
                 <button
