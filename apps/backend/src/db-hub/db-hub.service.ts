@@ -9,6 +9,7 @@ import { MongoClient } from 'mongodb';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { DevForgeEvents, DbQueryPayload } from '@devforge/event-bus';
+import { DbConnectionDto } from '@devforge/db-hub';
 
 @Injectable()
 export class DbHubService {
@@ -26,18 +27,7 @@ export class DbHubService {
     });
   }
 
-  async createConnection(
-    projectId: string,
-    dto: {
-      name: string;
-      type: string;
-      host: string;
-      port: number;
-      database: string;
-      username: string;
-      password?: string;
-    },
-  ) {
+  async createConnection(projectId: string, dto: DbConnectionDto) {
     return this.prisma.dbConnection.create({
       data: {
         projectId,
@@ -62,14 +52,9 @@ export class DbHubService {
 
   // --- Connection Testing ---
 
-  async testConnection(config: {
-    type: string;
-    host: string;
-    port: number;
-    database: string;
-    username: string;
-    password?: string;
-  }): Promise<{ success: boolean; message: string }> {
+  async testConnection(
+    config: DbConnectionDto,
+  ): Promise<{ success: boolean; message: string }> {
     const { type, host, port, database, username, password = '' } = config;
 
     if (type === 'postgres') {

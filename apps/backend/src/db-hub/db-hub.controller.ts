@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { DbHubService } from './db-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
+import * as DbHub from '@devforge/db-hub';
 
 @UseGuards(AuthGuard)
 @Controller('db-hub')
@@ -25,16 +26,7 @@ export class DbHubController {
   @Post('connections')
   async createConnection(
     @Body()
-    dto: {
-      projectId: string;
-      name: string;
-      type: string;
-      host: string;
-      port: number;
-      database: string;
-      username: string;
-      password?: string;
-    },
+    dto: DbHub.DbConnectionDto,
   ) {
     return this.dbHubService.createConnection(dto.projectId, dto);
   }
@@ -48,14 +40,7 @@ export class DbHubController {
   @HttpCode(HttpStatus.OK)
   async testConnection(
     @Body()
-    dto: {
-      type: string;
-      host: string;
-      port: number;
-      database: string;
-      username: string;
-      password?: string;
-    },
+    dto: DbHub.DbConnectionDto,
   ) {
     return this.dbHubService.testConnection(dto);
   }
@@ -64,10 +49,7 @@ export class DbHubController {
   @HttpCode(HttpStatus.OK)
   async executeQuery(
     @Body()
-    dto: {
-      connectionId: string;
-      query: string;
-    },
+    dto: DbHub.ExecuteQueryDto,
   ) {
     return this.dbHubService.executeQuery(dto.connectionId, dto.query);
   }
