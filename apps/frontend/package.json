@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@devforge/api-hub": "workspace:*",
     "@devforge/event-bus": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.18.0",

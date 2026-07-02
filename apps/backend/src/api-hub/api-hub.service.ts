@@ -4,6 +4,7 @@ import type { Cache } from 'cache-manager';
 import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBusService } from '../event-bus/event-bus.service';
+import { ExecuteRequestDto, SaveRequestDto } from '@devforge/api-hub';
 import {
   DevForgeEvents,
   ApiRequestPayload,
@@ -22,13 +23,7 @@ export class ApiHubService {
    * Executes a custom HTTP REST request, measures response latency,
    * emits WebSocket events, and records the request details to the DB.
    */
-  async executeRequest(dto: {
-    projectId: string;
-    method: string;
-    url: string;
-    headers?: Record<string, string>;
-    body?: unknown;
-  }) {
+  async executeRequest(dto: ExecuteRequestDto) {
     const { projectId, method, url, headers = {}, body } = dto;
     const requestId = Math.random().toString(36).substring(7);
     const timestamp = Date.now();
@@ -143,14 +138,7 @@ export class ApiHubService {
   }
 
   // --- Saved Requests CRUD ---
-  async saveRequest(dto: {
-    collectionId: string;
-    name: string;
-    method: string;
-    url: string;
-    headers: string;
-    body?: string;
-  }) {
+  async saveRequest(dto: SaveRequestDto) {
     return this.prisma.savedRequest.create({ data: dto });
   }
 

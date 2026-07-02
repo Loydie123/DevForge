@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiHubService } from './api-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
+import * as ApiHub from '@devforge/api-hub';
 
 @UseGuards(AuthGuard)
 @Controller('api-hub')
@@ -19,13 +20,7 @@ export class ApiHubController {
   @Post('execute')
   async executeRequest(
     @Body()
-    dto: {
-      projectId: string;
-      method: string;
-      url: string;
-      headers?: Record<string, string>;
-      body?: unknown;
-    },
+    dto: ApiHub.ExecuteRequestDto,
   ) {
     return this.apiHubService.executeRequest(dto);
   }
@@ -49,18 +44,10 @@ export class ApiHubController {
     return this.apiHubService.deleteCollection(projectId, id);
   }
 
-  // Saved Requests
   @Post('requests')
   saveRequest(
     @Body()
-    dto: {
-      collectionId: string;
-      name: string;
-      method: string;
-      url: string;
-      headers: string;
-      body?: string;
-    },
+    dto: ApiHub.SaveRequestDto,
   ) {
     return this.apiHubService.saveRequest(dto);
   }
