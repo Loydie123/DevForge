@@ -8,27 +8,13 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { DevForgeEvents } from '@devforge/event-bus';
+import {
+  DockerContainer,
+  DockerStats,
+  ContainerAction,
+} from '@devforge/devops-hub';
 
 const execAsync = promisify(exec);
-
-export interface DockerContainer {
-  ID: string;
-  Names: string;
-  Image: string;
-  State: string;
-  Status: string;
-  Ports: string;
-}
-
-export interface DockerStats {
-  Container: string;
-  Name: string;
-  CPUPerc: string;
-  MemUsage: string;
-  MemPerc: string;
-  NetIO: string;
-  BlockIO: string;
-}
 
 @Injectable()
 export class DevOpsService implements OnModuleInit, OnModuleDestroy {
@@ -91,7 +77,7 @@ export class DevOpsService implements OnModuleInit, OnModuleDestroy {
    */
   async controlContainer(
     id: string,
-    action: 'start' | 'stop' | 'restart',
+    action: ContainerAction,
   ): Promise<{ success: boolean; message: string }> {
     if (!['start', 'stop', 'restart'].includes(action)) {
       throw new BadRequestException(`Invalid container action: ${action}`);

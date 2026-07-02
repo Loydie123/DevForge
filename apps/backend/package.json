@@ -23,6 +23,7 @@
   "dependencies": {
     "@devforge/api-hub": "workspace:*",
     "@devforge/db-hub": "workspace:*",
+    "@devforge/devops-hub": "workspace:*",
     "@devforge/event-bus": "workspace:*",
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^11.0.1",

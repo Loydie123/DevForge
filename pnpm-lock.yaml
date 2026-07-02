@@ -20,6 +20,9 @@ importers:
       '@devforge/db-hub':
         specifier: workspace:*
         version: link:../../modules/db-hub
+      '@devforge/devops-hub':
+        specifier: workspace:*
+        version: link:../../modules/devops-hub
       '@devforge/event-bus':
         specifier: workspace:*
         version: link:../../core/event-bus
@@ -174,6 +177,9 @@ importers:
       '@devforge/db-hub':
         specifier: workspace:*
         version: link:../../modules/db-hub
+      '@devforge/devops-hub':
+        specifier: workspace:*
+        version: link:../../modules/devops-hub
       '@devforge/event-bus':
         specifier: workspace:*
         version: link:../../core/event-bus
@@ -237,6 +243,12 @@ importers:
         version: 5.9.3
 
   modules/db-hub:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  modules/devops-hub:
     devDependencies:
       typescript:
         specifier: ^5.0.0
