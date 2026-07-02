@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminService, AdminUser } from "../../services/admin-service";
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY } from "../../config/env";
 
 export default function useAdmin() {
@@ -12,30 +12,7 @@ export default function useAdmin() {
   const queryClient = useQueryClient();
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-
-  // 1. Auth guard — admin only
-  const {
-    data: user,
-    isLoading: isAuthLoading,
-    error: authError,
-  } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) router.push("/login");
-  }, [router]);
+  const { user, isAuthLoading } = useWorkspace();
 
   // Redirect non-admins after user loads
   useEffect(() => {

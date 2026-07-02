@@ -8,7 +8,7 @@ import {
   DbConnection, 
   QueryResultDto 
 } from "../../services/db-hub-service";
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY } from "../../config/env";
 
 const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
@@ -16,6 +16,7 @@ const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
 export default function useDbHub() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user, isAuthLoading } = useWorkspace();
 
   // Active Connection ID state
   const [activeConnectionId, setActiveConnectionId] = useState<string | null>(null);
@@ -36,30 +37,6 @@ export default function useDbHub() {
   const [formPassword, setFormPassword] = useState("");
   
   const [testFeedback, setTestFeedback] = useState<{ success: boolean; message: string } | null>(null);
-
-  // 1. Fetch User Profile via React Query
-  const { data: user, isLoading: isAuthLoading, error: authError } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  // Handle auth redirection if token fails
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  // Check if token exists on mount
-  useEffect(() => {
-    const activeToken = localStorage.getItem(TOKEN_KEY);
-    if (!activeToken) {
-      router.push("/login");
-    }
-  }, [router]);
 
   // 2. Fetch Connection Profiles
   const { data: connections = [], isLoading: isLoadingConnections } = useQuery({

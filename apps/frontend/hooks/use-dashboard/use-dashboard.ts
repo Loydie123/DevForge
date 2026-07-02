@@ -12,42 +12,19 @@ import {
   ApiResponsePayload,
 } from "@devforge/event-bus";
 
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { apiService } from "../../services/api-service";
 import { WS_GATEWAY_URL, TOKEN_KEY } from "../../config/env";
 
 export default function useDashboard() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user, isAuthLoading } = useWorkspace();
   
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [logs, setLogs] = useState<LogPayload[]>([]);
   const [metrics, setMetrics] = useState<MetricPayload | null>(null);
-
-  // 1. Fetch User Profile via React Query
-  const { data: user, isLoading: isAuthLoading, error: authError } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  // Handle auth failures
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  // Verify token presence on mount
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      router.push("/login");
-    }
-  }, [router]);
 
   // 2. Manage WebSocket connection when auth resolves
   useEffect(() => {

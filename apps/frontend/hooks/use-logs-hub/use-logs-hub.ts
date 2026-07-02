@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { io, Socket } from "socket.io-client";
 import { DevForgeEvents, LogPayload } from "@devforge/event-bus";
 import { logsHubService, ErrorLog } from "../../services/logs-hub-service";
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
 const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
@@ -14,6 +14,7 @@ const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
 export default function useLogsHub() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user, isAuthLoading } = useWorkspace();
 
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -32,30 +33,6 @@ export default function useLogsHub() {
 
   // Detailed error modal
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
-
-  // 1. Fetch User Profile
-  const { data: user, isLoading: isAuthLoading, error: authError } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  // Handle auth failures
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  // Check token presence on mount
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-      router.push("/login");
-    }
-  }, [router]);
 
   // 2. Fetch Watched Log Sources
   const { data: sources = [], isLoading: isLoadingSources } = useQuery({

@@ -11,7 +11,7 @@ import {
   DockerStats,
   ContainerAction,
 } from "../../services/devops-hub-service";
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
 export interface LiveContainerMetric {
@@ -28,6 +28,7 @@ export default function useDevopsHub() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
+  const { user, isAuthLoading } = useWorkspace();
 
   const [isConnected, setIsConnected] = useState(false);
   const [liveMetrics, setLiveMetrics] = useState<
@@ -41,30 +42,6 @@ export default function useDevopsHub() {
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(
     null
   );
-
-  // 1. Auth guard
-  const {
-    data: user,
-    isLoading: isAuthLoading,
-    error: authError,
-  } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) router.push("/login");
-  }, [router]);
 
   // 2. Fetch containers list (poll every 10s for state changes)
   const {

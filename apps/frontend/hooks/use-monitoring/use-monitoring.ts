@@ -10,7 +10,7 @@ import {
   SystemMetrics,
   UptimeCheck,
 } from "../../services/monitoring-service";
-import { authService } from "../../services/auth-service";
+import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
 const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
@@ -32,6 +32,7 @@ export default function useMonitoring() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
+  const { user, isAuthLoading } = useWorkspace();
 
   const [isConnected, setIsConnected] = useState(false);
 
@@ -43,30 +44,6 @@ export default function useMonitoring() {
 
   // Selected check for detail view
   const [selectedCheckId, setSelectedCheckId] = useState<string | null>(null);
-
-  // 1. Auth guard
-  const {
-    data: user,
-    isLoading: isAuthLoading,
-    error: authError,
-  } = useQuery({
-    queryKey: ["user-profile"],
-    queryFn: () => authService.getProfile(),
-    retry: false,
-    staleTime: Infinity,
-  });
-
-  useEffect(() => {
-    if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      router.push("/login");
-    }
-  }, [authError, router]);
-
-  useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) router.push("/login");
-  }, [router]);
 
   // 2. System metrics (poll every 5s)
   const { data: systemMetrics, isLoading: isLoadingSystem } =
