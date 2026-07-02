@@ -1,14 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { useDbHub } from "../../../hooks";
-import Header from "../../../components/header";
+import { useWorkspace } from "../../../components/workspace-context";
 import ConnectionsSidebar from "./connections-sidebar";
 import SqlComposer from "./sql-composer";
 import ResultsGrid from "./results-grid";
 
 export default function DbHub() {
   const {
-    user,
     isAuthLoading,
     connections,
     activeConnection,
@@ -52,8 +52,13 @@ export default function DbHub() {
     handleSaveConnection,
     handleDeleteConnection,
     handleClearHistory,
-    handleLogout
   } = useDbHub();
+
+  const { setIsConnected } = useWorkspace();
+
+  useEffect(() => {
+    setIsConnected(true);
+  }, [setIsConnected]);
 
   if (isAuthLoading) {
     return (
@@ -65,10 +70,7 @@ export default function DbHub() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      {/* Top Shared Navbar */}
-      <Header isConnected={true} user={user} onLogout={handleLogout} />
-
+    <>
       {/* Main Container Frame */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-6 min-h-0">
         
@@ -140,6 +142,7 @@ export default function DbHub() {
 
         </div>
       </main>
-    </div>
+    </>
   );
 }
+

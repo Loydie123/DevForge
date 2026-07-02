@@ -1,14 +1,14 @@
 "use client";
 
 import useApiHub from "../_hooks/use-api-hub";
-import Header from "../../../components/header";
+import { useEffect } from "react";
+import { useWorkspace } from "../../../components/workspace-context";
 import CollectionsSidebar from "./collections-sidebar";
 import RequestPanel from "./request-panel";
 import ResponsePanel from "./response-panel";
 
 export default function ApiHub() {
   const {
-    user,
     isAuthLoading,
     collections,
     history,
@@ -51,8 +51,13 @@ export default function ApiHub() {
     loadSavedRequestIntoComposer,
     loadHistoryItemIntoComposer,
     handleClearHistory,
-    handleLogout
   } = useApiHub();
+
+  const { setIsConnected } = useWorkspace();
+
+  useEffect(() => {
+    setIsConnected(true);
+  }, [setIsConnected]);
 
   if (isAuthLoading) {
     return (
@@ -64,75 +69,68 @@ export default function ApiHub() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      {/* Top Navigation Bar */}
-      <Header isConnected={true} user={user} onLogout={handleLogout} />
+    <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-6 min-h-0">
+      {/* Module Title Header */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-mono font-bold tracking-tight text-white">
+          API Hub Workbench
+        </h1>
+        <p className="text-xs text-slate-400">
+          Compose REST endpoints, organize collections, manage environment parameters, and inspect HTTP response payloads.
+        </p>
+      </div>
 
-      {/* Main Workspace Frame */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-6 min-h-0">
+      {/* Double-Panel Workspace */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-0 items-stretch">
         
-        {/* Module Header */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-mono font-bold tracking-tight text-white">
-            API Hub Console
-          </h1>
-          <p className="text-xs text-slate-400">
-            Design HTTP requests, manage folder collections, and inspect real-time execution telemetry.
-          </p>
-        </div>
+        {/* Left Side: Sidebar */}
+        <CollectionsSidebar
+          collections={collections}
+          history={history}
+          isLoadingLists={isLoadingLists}
+          sidebarTab={sidebarTab}
+          setSidebarTab={setSidebarTab}
+          newCollectionName={newCollectionName}
+          setNewCollectionName={setNewCollectionName}
+          isCreatingCollection={isCreatingCollection}
+          handleCreateCollection={handleCreateCollection}
+          handleDeleteCollection={handleDeleteCollection}
+          handleSaveRequest={handleSaveRequest}
+          handleDeleteRequest={handleDeleteRequest}
+          loadSavedRequestIntoComposer={loadSavedRequestIntoComposer}
+          loadHistoryItemIntoComposer={loadHistoryItemIntoComposer}
+          handleClearHistory={handleClearHistory}
+        />
 
-        {/* Double-Panel Split Layout */}
-        <div className="flex flex-col lg:flex-row gap-6 min-h-0 items-stretch">
-          
-          {/* Left panel: Sider tree list */}
-          <CollectionsSidebar
-            collections={collections}
-            history={history}
-            sidebarTab={sidebarTab}
-            setSidebarTab={setSidebarTab}
-            isLoadingLists={isLoadingLists}
-            newCollectionName={newCollectionName}
-            setNewCollectionName={setNewCollectionName}
-            isCreatingCollection={isCreatingCollection}
-            handleCreateCollection={handleCreateCollection}
-            handleDeleteCollection={handleDeleteCollection}
-            handleSaveRequest={handleSaveRequest}
-            handleDeleteRequest={handleDeleteRequest}
-            loadSavedRequestIntoComposer={loadSavedRequestIntoComposer}
-            loadHistoryItemIntoComposer={loadHistoryItemIntoComposer}
-            handleClearHistory={handleClearHistory}
+        {/* Right Side: Workbench & Response inspector split */}
+        <div className="flex-1 flex flex-col gap-6 min-h-0">
+          {/* Request Composer */}
+          <RequestPanel
+            method={method}
+            setMethod={setMethod}
+            url={url}
+            setUrl={setUrl}
+            headers={headers}
+            setHeaders={setHeaders}
+            body={body}
+            setBody={setBody}
+            isExecuting={isExecuting}
+            handleSendRequest={handleSendRequest}
+            composerTab={composerTab}
+            setComposerTab={setComposerTab}
           />
 
-          {/* Right panel: Editor Workspace */}
-          <div className="flex-1 flex flex-col gap-6 min-h-0">
-            {/* Request Composer */}
-            <RequestPanel
-              method={method}
-              setMethod={setMethod}
-              url={url}
-              setUrl={setUrl}
-              headers={headers}
-              setHeaders={setHeaders}
-              body={body}
-              setBody={setBody}
-              isExecuting={isExecuting}
-              handleSendRequest={handleSendRequest}
-              composerTab={composerTab}
-              setComposerTab={setComposerTab}
-            />
-
-            {/* Response Inspector */}
-            <ResponsePanel
-              response={response}
-              executionError={executionError}
-              isExecuting={isExecuting}
-              responseTab={responseTab}
-              setResponseTab={setResponseTab}
-            />
-          </div>
-
+          {/* Response Inspector */}
+          <ResponsePanel
+            response={response}
+            executionError={executionError}
+            isExecuting={isExecuting}
+            responseTab={responseTab}
+            setResponseTab={setResponseTab}
+          />
         </div>
-      </main>
-    </div>
+
+      </div>
+    </main>
   );
 }

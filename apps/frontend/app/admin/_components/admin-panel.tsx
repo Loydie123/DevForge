@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import useAdmin from "../../../hooks/use-admin/use-admin";
-import Header from "../../../components/header";
+import { useWorkspace } from "../../../components/workspace-context";
 
 function StatCard({
   label,
@@ -49,10 +50,11 @@ export default function AdminPanel() {
     isDeletingUser,
   } = useAdmin();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+  const { setIsConnected } = useWorkspace();
+
+  useEffect(() => {
+    setIsConnected(true);
+  }, [setIsConnected]);
 
   if (isAuthLoading) {
     return (
@@ -65,13 +67,7 @@ export default function AdminPanel() {
   const deleteTarget = users.find((u) => u.id === deleteTargetId);
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white flex flex-col select-none">
-      <Header
-        isConnected={true}
-        user={user ?? null}
-        onLogout={handleLogout}
-      />
-
+    <>
       {/* Page Title Bar */}
       <div className="border-b border-slate-800 bg-slate-900/30">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-3">
@@ -404,6 +400,7 @@ export default function AdminPanel() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
+

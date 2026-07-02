@@ -3,8 +3,8 @@
 // Custom Hook separating Business Logic
 import { useDashboard } from "../../hooks";
 
-// Global Shared Components
-import Header from "../../components/header";
+import { useEffect } from "react";
+import { useWorkspace } from "../../components/workspace-context";
 
 // Colocated Page Components
 import WelcomeBanner from "./welcome-banner";
@@ -18,13 +18,17 @@ export default function Dashboard() {
     metrics,
     isTriggering,
     isExecuting,
-    user,
     isAuthLoading,
     triggerMockEvent,
     executeApiHubRequest,
-    handleLogout,
     clearLogs,
   } = useDashboard();
+
+  const { setIsConnected } = useWorkspace();
+
+  useEffect(() => {
+    setIsConnected(isConnected);
+  }, [isConnected, setIsConnected]);
 
   if (isAuthLoading) {
     return (
@@ -36,29 +40,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      {/* Top Navigation Bar */}
-      <Header isConnected={isConnected} user={user} onLogout={handleLogout} />
+    <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
+      {/* Welcome control triggers */}
+      <WelcomeBanner
+        isTriggering={isTriggering}
+        isExecuting={isExecuting}
+        onTriggerMock={triggerMockEvent}
+        onExecuteRequest={executeApiHubRequest}
+      />
 
-      {/* Main Dashboard Panel */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
-        {/* Welcome control triggers */}
-        <WelcomeBanner
-          isTriggering={isTriggering}
-          isExecuting={isExecuting}
-          onTriggerMock={triggerMockEvent}
-          onExecuteRequest={executeApiHubRequest}
-        />
+      {/* Dashboard Grid Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Real-time metric cards */}
+        <MetricsDisplay metrics={metrics} />
 
-        {/* Dashboard Grid Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Real-time metric cards */}
-          <MetricsDisplay metrics={metrics} />
-
-          {/* Scrolling log cards */}
-          <LogsStream logs={logs} onClear={clearLogs} />
-        </div>
-      </main>
-    </div>
+        {/* Scrolling log cards */}
+        <LogsStream logs={logs} onClear={clearLogs} />
+      </div>
+    </main>
   );
 }
+

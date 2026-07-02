@@ -1,12 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import useDevopsHub from "../../../hooks/use-devops-hub/use-devops-hub";
-import Header from "../../../components/header";
+import { useWorkspace } from "../../../components/workspace-context";
 import ContainersPanel from "./containers-panel";
 
 export default function DevopsHub() {
   const {
-    user,
     isAuthLoading,
     isConnected,
     enrichedContainers,
@@ -21,10 +21,11 @@ export default function DevopsHub() {
     actionFeedback,
   } = useDevopsHub();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+  const { setIsConnected } = useWorkspace();
+
+  useEffect(() => {
+    setIsConnected(isConnected);
+  }, [isConnected, setIsConnected]);
 
   if (isAuthLoading) {
     return (
@@ -43,13 +44,7 @@ export default function DevopsHub() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white flex flex-col select-none">
-      <Header
-        isConnected={isConnected}
-        user={user ?? null}
-        onLogout={handleLogout}
-      />
-
+    <>
       {/* Page Title Bar */}
       <div className="border-b border-slate-800 bg-slate-900/30">
         <div className="max-w-full px-6 py-3 flex items-center justify-between">
@@ -145,6 +140,7 @@ export default function DevopsHub() {
           actionFeedback={actionFeedback}
         />
       </div>
-    </div>
+    </>
   );
 }
+
