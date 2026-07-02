@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiResponseData } from "../_hooks/use-api-hub";
+import { formatBytes } from "../../../lib/utils";
 
 interface ResponsePanelProps {
   response: ApiResponseData | null;
@@ -17,14 +18,6 @@ export default function ResponsePanel({
   responseTab,
   setResponseTab,
 }: ResponsePanelProps) {
-  
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   const getStatusColorClass = (status: number) => {
     if (status >= 200 && status < 300) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";

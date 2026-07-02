@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserProfile } from "@devforge/auth";
 
 interface SidebarProps {
-  user: { email: string; role: string; name?: string } | null;
+  user: UserProfile | null;
 }
 
 const NAV_ITEMS = [

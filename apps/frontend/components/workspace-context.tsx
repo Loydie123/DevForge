@@ -4,16 +4,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { authService } from "../services/auth-service";
+import { UserProfile } from "@devforge/auth";
 import { TOKEN_KEY } from "../config/env";
 import AppShell from "./app-shell";
-
-interface UserProfile {
-  id?: string;
-  userId: string;
-  email: string;
-  role: string;
-  name?: string;
-}
 
 interface WorkspaceContextType {
   user: UserProfile | null;

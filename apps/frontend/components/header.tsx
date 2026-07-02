@@ -1,8 +1,8 @@
-"use client";
+import { UserProfile } from "@devforge/auth";
 
 interface HeaderProps {
   isConnected: boolean;
-  user: { email: string; role: string; name?: string } | null;
+  user: UserProfile | null;
   onLogout: () => void;
 }
 

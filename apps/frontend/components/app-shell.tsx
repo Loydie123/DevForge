@@ -2,11 +2,12 @@
 
 import Sidebar from "./sidebar";
 import Header from "./header";
+import { UserProfile } from "@devforge/auth";
 
 interface AppShellProps {
   children: React.ReactNode;
   isConnected: boolean;
-  user: { email: string; role: string; name?: string } | null;
+  user: UserProfile | null;
   onLogout: () => void;
 }
 
