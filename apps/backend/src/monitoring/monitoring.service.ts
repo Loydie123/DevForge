@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { DevForgeEvents } from '@devforge/event-bus';
+import { CreateUptimeCheckDto, SystemMetrics } from '@devforge/monitoring-hub';
 import * as os from 'os';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -48,7 +49,7 @@ export class MonitoringService implements OnModuleInit, OnModuleDestroy {
 
   // --- Host System Metrics ---
 
-  async getSystemMetrics() {
+  async getSystemMetrics(): Promise<SystemMetrics> {
     const cpuPercent = await this.getCpuUsage();
 
     const totalMem = os.totalmem();
@@ -291,12 +292,7 @@ export class MonitoringService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  async createUptimeCheck(dto: {
-    projectId: string;
-    name: string;
-    url: string;
-    interval?: number;
-  }) {
+  async createUptimeCheck(dto: CreateUptimeCheckDto) {
     const interval = dto.interval || 60;
 
     // Ensure check is valid URL

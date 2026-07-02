@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { MonitoringService } from './monitoring.service';
 import { AuthGuard } from '../auth/auth.guard';
+import * as MonitoringHub from '@devforge/monitoring-hub';
 
 @UseGuards(AuthGuard)
 @Controller('monitoring')
@@ -16,7 +17,7 @@ export class MonitoringController {
   constructor(private readonly monitoringService: MonitoringService) {}
 
   @Get('system')
-  async getSystemMetrics() {
+  async getSystemMetrics(): Promise<MonitoringHub.SystemMetrics> {
     return this.monitoringService.getSystemMetrics();
   }
 
@@ -28,12 +29,7 @@ export class MonitoringController {
   @Post('uptime-checks')
   async createUptimeCheck(
     @Body()
-    dto: {
-      projectId: string;
-      name: string;
-      url: string;
-      interval?: number;
-    },
+    dto: MonitoringHub.CreateUptimeCheckDto,
   ) {
     return this.monitoringService.createUptimeCheck(dto);
   }

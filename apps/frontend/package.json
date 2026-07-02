@@ -13,6 +13,7 @@
     "@devforge/db-hub": "workspace:*",
     "@devforge/devops-hub": "workspace:*",
     "@devforge/event-bus": "workspace:*",
+    "@devforge/monitoring-hub": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.18.0",
     "next": "16.2.9",
