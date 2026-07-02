@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { LogsHubService } from './logs-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
+import * as LogsHub from '@devforge/logs-hub';
 
 @UseGuards(AuthGuard)
 @Controller('logs-hub')
@@ -27,11 +28,7 @@ export class LogsHubController {
   @Post('sources')
   async addSource(
     @Body()
-    dto: {
-      projectId: string;
-      name: string;
-      filePath: string;
-    },
+    dto: LogsHub.LogSourceDto,
   ) {
     return this.logsHubService.addSource(dto.projectId, dto.name, dto.filePath);
   }
@@ -51,13 +48,7 @@ export class LogsHubController {
   @Post('errors')
   async recordError(
     @Body()
-    dto: {
-      projectId: string;
-      service: string;
-      message: string;
-      stack?: string;
-      severity: string;
-    },
+    dto: LogsHub.ErrorLogDto,
   ) {
     return this.logsHubService.recordError(dto.projectId, dto);
   }

@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { EventBusService } from '../event-bus/event-bus.service';
 import { DevForgeEvents } from '@devforge/event-bus';
+import { ErrorLogDto } from '@devforge/logs-hub';
 import * as fs from 'fs';
 
 @Injectable()
@@ -160,12 +161,7 @@ export class LogsHubService implements OnModuleInit, OnModuleDestroy {
 
   async recordError(
     projectId: string,
-    dto: {
-      service: string;
-      message: string;
-      stack?: string;
-      severity: string;
-    },
+    dto: ErrorLogDto,
   ) {
     const errorLog = await this.prisma.errorLog.create({
       data: {

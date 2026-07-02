@@ -26,6 +26,9 @@ importers:
       '@devforge/event-bus':
         specifier: workspace:*
         version: link:../../core/event-bus
+      '@devforge/logs-hub':
+        specifier: workspace:*
+        version: link:../../modules/logs-hub
       '@devforge/monitoring-hub':
         specifier: workspace:*
         version: link:../../modules/monitoring-hub
@@ -186,6 +189,9 @@ importers:
       '@devforge/event-bus':
         specifier: workspace:*
         version: link:../../core/event-bus
+      '@devforge/logs-hub':
+        specifier: workspace:*
+        version: link:../../modules/logs-hub
       '@devforge/monitoring-hub':
         specifier: workspace:*
         version: link:../../modules/monitoring-hub
@@ -255,6 +261,12 @@ importers:
         version: 5.9.3
 
   modules/devops-hub:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  modules/logs-hub:
     devDependencies:
       typescript:
         specifier: ^5.0.0

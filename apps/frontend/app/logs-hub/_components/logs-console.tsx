@@ -34,12 +34,14 @@ export default function LogsConsole({
   handleClearConsole,
   handleDownloadLogs,
 }: LogsConsoleProps) {
-  const terminalEndRef = useRef<HTMLDivElement | null>(null);
+  const consoleContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll logic to snap scroll to bottom
   useEffect(() => {
-    if (autoScroll && terminalEndRef.current) {
-      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (autoScroll && consoleContainerRef.current) {
+      const container = consoleContainerRef.current;
+      // Directly scroll container to bottom to prevent outer layout shifting
+      container.scrollTop = container.scrollHeight;
     }
   }, [logs, autoScroll]);
 
@@ -138,7 +140,7 @@ export default function LogsConsole({
       </div>
 
       {/* Terminal Viewport */}
-      <div className="flex-1 bg-[#0b0d16] border border-slate-800/80 rounded-xl p-4 overflow-y-auto min-h-0 flex flex-col font-mono text-[11px] leading-relaxed">
+      <div ref={consoleContainerRef} className="flex-1 bg-[#0b0d16] border border-slate-800/80 rounded-xl p-4 overflow-y-auto min-h-0 flex flex-col font-mono text-[11px] leading-relaxed">
         {logs.length > 0 ? (
           <div className="flex flex-col gap-1.5 select-text">
             {logs.map((log, index) => {
@@ -162,7 +164,6 @@ export default function LogsConsole({
                 </div>
               );
             })}
-            <div ref={terminalEndRef} />
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-2 text-slate-650 text-center select-none">
