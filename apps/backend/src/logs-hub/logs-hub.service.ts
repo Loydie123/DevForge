@@ -159,10 +159,7 @@ export class LogsHubService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  async recordError(
-    projectId: string,
-    dto: ErrorLogDto,
-  ) {
+  async recordError(projectId: string, dto: ErrorLogDto) {
     const errorLog = await this.prisma.errorLog.create({
       data: {
         projectId,

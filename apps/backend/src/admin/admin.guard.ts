@@ -4,8 +4,9 @@ import {
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import { AuthService, JwtPayload } from '../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { Request } from 'express';
+import { JwtPayload } from '@devforge/auth';
 
 interface CustomRequest extends Request {
   user?: JwtPayload;

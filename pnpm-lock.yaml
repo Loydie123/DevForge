@@ -17,6 +17,9 @@ importers:
       '@devforge/api-hub':
         specifier: workspace:*
         version: link:../../modules/api-hub
+      '@devforge/auth':
+        specifier: workspace:*
+        version: link:../../core/auth
       '@devforge/db-hub':
         specifier: workspace:*
         version: link:../../modules/db-hub
@@ -180,6 +183,9 @@ importers:
       '@devforge/api-hub':
         specifier: workspace:*
         version: link:../../modules/api-hub
+      '@devforge/auth':
+        specifier: workspace:*
+        version: link:../../core/auth
       '@devforge/db-hub':
         specifier: workspace:*
         version: link:../../modules/db-hub
@@ -240,6 +246,12 @@ importers:
         version: 4.3.1
       typescript:
         specifier: ^5
+        version: 5.9.3
+
+  core/auth:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
         version: 5.9.3
 
   core/event-bus:

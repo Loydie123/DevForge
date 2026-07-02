@@ -7,9 +7,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService, JwtPayload } from './auth.service';
+import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
+import * as Auth from '@devforge/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -18,12 +19,7 @@ export class AuthController {
   @Post('register')
   async register(
     @Body()
-    dto: {
-      email: string;
-      password?: string;
-      name?: string;
-      role?: string;
-    },
+    dto: Auth.RegisterDto,
   ) {
     return this.authService.register(dto);
   }
@@ -32,17 +28,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body()
-    dto: {
-      email: string;
-      password?: string;
-    },
+    dto: Auth.LoginDto,
   ) {
     return this.authService.login(dto);
   }
 
   @Get('me')
   @UseGuards(AuthGuard)
-  getMe(@CurrentUser() user: JwtPayload) {
+  getMe(@CurrentUser() user: Auth.JwtPayload) {
     return user;
   }
 }

@@ -6,12 +6,12 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-
-export class JwtPayload {
-  userId!: string;
-  email!: string;
-  role!: string;
-}
+import {
+  RegisterDto,
+  LoginDto,
+  JwtPayload,
+  AuthResponse,
+} from '@devforge/auth';
 
 @Injectable()
 export class AuthService {
@@ -20,12 +20,7 @@ export class AuthService {
 
   constructor(private prisma: PrismaService) {}
 
-  async register(dto: {
-    email: string;
-    password?: string;
-    name?: string;
-    role?: string;
-  }) {
+  async register(dto: RegisterDto): Promise<AuthResponse> {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -64,7 +59,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: { email: string; password?: string }) {
+  async login(dto: LoginDto): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });

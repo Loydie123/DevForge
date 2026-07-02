@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@devforge/api-hub": "workspace:*",
+    "@devforge/auth": "workspace:*",
     "@devforge/db-hub": "workspace:*",
     "@devforge/devops-hub": "workspace:*",
     "@devforge/event-bus": "workspace:*",
