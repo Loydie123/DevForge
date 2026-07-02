@@ -1,25 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  createdAt: Date;
-  _count: { projects: number };
-}
-
-export interface PlatformStats {
-  totalUsers: number;
-  totalAdmins: number;
-  totalDevelopers: number;
-  totalProjects: number;
-  totalApiRequests: number;
-  totalDbConnections: number;
-  totalErrorLogs: number;
-  recentUsers: AdminUser[];
-}
+import { AdminUser, PlatformStats } from '@devforge/permissions';
 
 @Injectable()
 export class AdminService {

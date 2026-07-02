@@ -1,24 +1,13 @@
 import { apiClient } from "./api-client";
+import {
+  AdminUser,
+  PlatformStats,
+} from "@devforge/permissions";
 
-export interface AdminUser {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  createdAt: string;
-  _count: { projects: number };
-}
-
-export interface PlatformStats {
-  totalUsers: number;
-  totalAdmins: number;
-  totalDevelopers: number;
-  totalProjects: number;
-  totalApiRequests: number;
-  totalDbConnections: number;
-  totalErrorLogs: number;
-  recentUsers: AdminUser[];
-}
+export type {
+  AdminUser,
+  PlatformStats,
+};
 
 export const adminService = {
   async getStats(): Promise<PlatformStats> {

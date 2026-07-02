@@ -9,8 +9,9 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { AdminService, AdminUser, PlatformStats } from './admin.service';
+import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
+import * as Permissions from '@devforge/permissions';
 
 @UseGuards(AdminGuard)
 @Controller('admin')
@@ -18,20 +19,20 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('stats')
-  async getPlatformStats(): Promise<PlatformStats> {
+  async getPlatformStats(): Promise<Permissions.PlatformStats> {
     return this.adminService.getPlatformStats();
   }
 
   @Get('users')
-  async getAllUsers(): Promise<AdminUser[]> {
+  async getAllUsers(): Promise<Permissions.AdminUser[]> {
     return this.adminService.getAllUsers();
   }
 
   @Patch('users/:id/role')
   async updateUserRole(
     @Param('id') id: string,
-    @Body() dto: { role: 'admin' | 'developer' },
-  ): Promise<AdminUser> {
+    @Body() dto: Permissions.UpdateUserRoleDto,
+  ): Promise<Permissions.AdminUser> {
     return this.adminService.updateUserRole(id, dto.role);
   }
 
