@@ -1,15 +1,11 @@
 "use client";
 
 import useMonitoring from "../../../hooks/use-monitoring/use-monitoring";
-import { useEffect } from "react";
-import { useWorkspace } from "../../../components/workspace-context";
 import SystemMetricsPanel from "./system-metrics-panel";
 import UptimeChecksPanel from "./uptime-checks-panel";
 
 export default function MonitoringHub() {
   const {
-    isAuthLoading,
-    isConnected,
     systemMetrics,
     isLoadingSystem,
     uptimeChecks,
@@ -28,22 +24,8 @@ export default function MonitoringHub() {
     isCreatingCheck,
     handleDeleteCheck,
     isDeletingCheck,
+    isConnected,
   } = useMonitoring();
-
-  const { setIsConnected } = useWorkspace();
-
-  useEffect(() => {
-    setIsConnected(isConnected);
-  }, [isConnected, setIsConnected]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-[#07090e] text-white flex flex-col items-center justify-center gap-4">
-        <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-        <p className="text-sm font-mono text-slate-400">Authenticating...</p>
-      </div>
-    );
-  }
 
   const upCount = uptimeChecks.filter((c) => c.status === "up").length;
   const downCount = uptimeChecks.filter((c) => c.status === "down").length;

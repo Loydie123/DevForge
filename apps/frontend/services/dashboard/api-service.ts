@@ -1,4 +1,5 @@
 import { apiClient } from "../api-client";
+import { DEFAULT_PROJECT_ID } from "../../config/env";
 
 export const apiService = {
   async triggerMockEvent() {
@@ -8,7 +9,7 @@ export const apiService = {
 
   async executeApiHubRequest() {
     const res = await apiClient.post<unknown>("/api-hub/execute", {
-      projectId: "00000000-0000-0000-0000-000000000000",
+      projectId: DEFAULT_PROJECT_ID,
       method: "GET",
       url: "https://httpbin.org/delay/1",
       headers: { Accept: "application/json" },

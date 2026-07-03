@@ -3,9 +3,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
+import { io, Socket } from "socket.io-client";
 import { authService } from "../services/auth/auth-service";
 import { UserProfile } from "@devforge/auth";
-import { TOKEN_KEY } from "../config/env";
+import { TOKEN_KEY, WS_GATEWAY_URL } from "../config/env";
 import AppShell from "./app-shell";
 
 interface WorkspaceContextType {
@@ -13,6 +14,7 @@ interface WorkspaceContextType {
   isAuthLoading: boolean;
   isConnected: boolean;
   setIsConnected: (connected: boolean) => void;
+  socket: Socket | null;
   logout: () => void;
 }
 
@@ -24,6 +26,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isConnected, setIsConnected] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const isAuthRoute = pathname === "/login" || pathname === "/register";
 
@@ -43,6 +46,41 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     enabled: !isAuthRoute,
   });
 
+  // Manage global socket connection based on user auth status
+  useEffect(() => {
+    if (isAuthRoute) return;
+
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!user || !token) return;
+
+    const socketInstance = io(WS_GATEWAY_URL, {
+      transports: ["websocket"],
+      auth: { token },
+    });
+
+    socketInstance.on("connect", () => {
+      setIsConnected(true);
+      console.log("Global Socket connected");
+    });
+
+    socketInstance.on("disconnect", () => {
+      setIsConnected(false);
+      console.log("Global Socket disconnected");
+    });
+
+    Promise.resolve().then(() => {
+      setSocket(socketInstance);
+    });
+
+    return () => {
+      socketInstance.disconnect();
+      Promise.resolve().then(() => {
+        setSocket(null);
+        setIsConnected(false);
+      });
+    };
+  }, [user, isAuthRoute]);
+
   // Redirect to login if unauthenticated on protected routes
   useEffect(() => {
     if (!isAuthRoute && !isAuthLoading && !user) {
@@ -52,6 +90,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, [user, isAuthLoading, isAuthRoute, router]);
 
   const logout = () => {
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+      setIsConnected(false);
+    }
     localStorage.removeItem(TOKEN_KEY);
     router.push("/login");
   };
@@ -65,6 +108,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
           isAuthLoading: false,
           isConnected: false,
           setIsConnected: () => {},
+          socket: null,
           logout,
         }}
       >
@@ -90,6 +134,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         isAuthLoading,
         isConnected,
         setIsConnected,
+        socket,
         logout,
       }}
     >

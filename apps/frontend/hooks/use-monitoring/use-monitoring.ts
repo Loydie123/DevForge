@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { io, Socket } from "socket.io-client";
 import { DevForgeEvents } from "@devforge/event-bus";
 import {
   monitoringService,
@@ -10,9 +9,7 @@ import {
   UptimeCheck,
 } from "../../services/monitoring/monitoring-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
-
-const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
+import { DEFAULT_PROJECT_ID } from "../../config/env";
 
 interface LiveUptimeUpdate {
   type: "uptime";
@@ -29,10 +26,7 @@ interface LiveUptimeUpdate {
 
 export default function useMonitoring() {
   const queryClient = useQueryClient();
-  const socketRef = useRef<Socket | null>(null);
-  const { user, isAuthLoading } = useWorkspace();
-
-  const [isConnected, setIsConnected] = useState(false);
+  const { user, isAuthLoading, isConnected, socket } = useWorkspace();
 
   // Add check form
   const [isAddCheckOpen, setIsAddCheckOpen] = useState(false);
@@ -43,23 +37,23 @@ export default function useMonitoring() {
   // Selected check for detail view
   const [selectedCheckId, setSelectedCheckId] = useState<string | null>(null);
 
-  // 2. System metrics (poll every 5s)
+  // 2. System metrics (poll every 10s)
   const { data: systemMetrics, isLoading: isLoadingSystem } =
     useQuery<SystemMetrics>({
       queryKey: ["system-metrics"],
       queryFn: () => monitoringService.getSystemMetrics(),
       enabled: !!user,
-      refetchInterval: 5_000,
+      refetchInterval: 10_000,
     });
 
-  // 3. Uptime checks list (poll every 15s)
+  // 3. Uptime checks list (poll every 10s)
   const { data: uptimeChecks = [], isLoading: isLoadingChecks } = useQuery<
     UptimeCheck[]
   >({
     queryKey: ["uptime-checks"],
     queryFn: () => monitoringService.getUptimeChecks(DEFAULT_PROJECT_ID),
     enabled: !!user,
-    refetchInterval: 15_000,
+    refetchInterval: 10_000,
   });
 
   // 4. Create uptime check mutation
@@ -89,36 +83,23 @@ export default function useMonitoring() {
     },
   });
 
-  // 6. WebSocket — listen for live uptime updates
+  // 6. WebSocket — listen for live uptime updates on the global socket
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!user || !token) return;
+    if (!socket) return;
 
-    const socketInstance = io(WS_GATEWAY_URL, {
-      transports: ["websocket"],
-      auth: { token },
-    });
-
-    socketInstance.on("connect", () => setIsConnected(true));
-    socketInstance.on("disconnect", () => setIsConnected(false));
-
-    socketInstance.on(
-      DevForgeEvents.METRIC_UPDATED,
-      (payload: LiveUptimeUpdate) => {
-        if (payload.type === "uptime") {
-          // Invalidate to refetch fresh results
-          void queryClient.invalidateQueries({ queryKey: ["uptime-checks"] });
-        }
+    const handleMetricUpdated = (payload: LiveUptimeUpdate) => {
+      if (payload.type === "uptime") {
+        // Invalidate to refetch fresh results
+        void queryClient.invalidateQueries({ queryKey: ["uptime-checks"] });
       }
-    );
+    };
 
-    socketRef.current = socketInstance;
+    socket.on(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
 
     return () => {
-      socketInstance.disconnect();
-      socketRef.current = null;
+      socket.off(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
     };
-  }, [user, queryClient]);
+  }, [socket, queryClient]);
 
   // Selected check details
   const selectedCheck = uptimeChecks.find((c) => c.id === selectedCheckId);

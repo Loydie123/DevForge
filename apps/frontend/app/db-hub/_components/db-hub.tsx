@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { useDbHub } from "../../../hooks";
-import { useWorkspace } from "../../../components/workspace-context";
 import ConnectionsSidebar from "./connections-sidebar";
 import SqlComposer from "./sql-composer";
 import ResultsGrid from "./results-grid";
 
 export default function DbHub() {
   const {
-    isAuthLoading,
     connections,
     activeConnection,
     setActiveConnection,
@@ -53,21 +50,6 @@ export default function DbHub() {
     handleDeleteConnection,
     handleClearHistory,
   } = useDbHub();
-
-  const { setIsConnected } = useWorkspace();
-
-  useEffect(() => {
-    setIsConnected(true);
-  }, [setIsConnected]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-slate-400 gap-3">
-        <div className="h-6 w-6 rounded-full border-2 border-slate-800 border-t-emerald-400 animate-spin" />
-        <span className="text-sm font-mono">Initializing DB Hub...</span>
-      </div>
-    );
-  }
 
   return (
     <>

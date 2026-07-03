@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { io, Socket } from "socket.io-client";
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   DevForgeEvents,
   LogPayload,
@@ -14,49 +12,26 @@ import {
 
 import { useWorkspace } from "../../components/workspace-context";
 import { apiService } from "../../services/dashboard/api-service";
-import { WS_GATEWAY_URL, TOKEN_KEY } from "../../config/env";
 
 export default function useDashboard() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { user, isAuthLoading } = useWorkspace();
+  const { user, isAuthLoading, isConnected, socket } = useWorkspace();
   
-  const socketRef = useRef<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [logs, setLogs] = useState<LogPayload[]>([]);
   const [metrics, setMetrics] = useState<MetricPayload | null>(null);
 
-  // 2. Manage WebSocket connection when auth resolves
+  // 2. Manage WebSocket listeners on the global socket
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!user || !token) return;
+    if (!socket) return;
 
-    // Connect to NestJS WebSocket Gateway with auth token
-    const socketInstance = io(WS_GATEWAY_URL, {
-      transports: ["websocket"],
-      auth: { token },
-    });
-
-    socketInstance.on("connect", () => {
-      setIsConnected(true);
-      console.log("Connected to WebSocket Gateway");
-    });
-
-    socketInstance.on("disconnect", () => {
-      setIsConnected(false);
-      console.log("Disconnected from WebSocket Gateway");
-    });
-
-    // Listen to real-time process events
-    socketInstance.on(DevForgeEvents.LOG_CREATED, (data: LogPayload) => {
+    const handleLogCreated = (data: LogPayload) => {
       setLogs((prev) => [data, ...prev].slice(0, 50));
-    });
+    };
 
-    socketInstance.on(DevForgeEvents.METRIC_UPDATED, (data: MetricPayload) => {
+    const handleMetricUpdated = (data: MetricPayload) => {
       setMetrics(data);
-    });
+    };
 
-    socketInstance.on(DevForgeEvents.API_REQUEST, (data: ApiRequestPayload) => {
+    const handleApiRequest = (data: ApiRequestPayload) => {
       const requestLog: LogPayload = {
         service: "api-hub",
         level: "info",
@@ -64,9 +39,9 @@ export default function useDashboard() {
         timestamp: data.timestamp,
       };
       setLogs((prev) => [requestLog, ...prev].slice(0, 50));
-    });
+    };
 
-    socketInstance.on(DevForgeEvents.API_RESPONSE, (data: ApiResponsePayload) => {
+    const handleApiResponse = (data: ApiResponsePayload) => {
       const responseLog: LogPayload = {
         service: "api-hub",
         level: data.statusCode >= 400 ? "error" : "info",
@@ -74,16 +49,20 @@ export default function useDashboard() {
         timestamp: data.timestamp,
       };
       setLogs((prev) => [responseLog, ...prev].slice(0, 50));
-    });
+    };
 
-    socketRef.current = socketInstance;
+    socket.on(DevForgeEvents.LOG_CREATED, handleLogCreated);
+    socket.on(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
+    socket.on(DevForgeEvents.API_REQUEST, handleApiRequest);
+    socket.on(DevForgeEvents.API_RESPONSE, handleApiResponse);
 
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
+      socket.off(DevForgeEvents.LOG_CREATED, handleLogCreated);
+      socket.off(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
+      socket.off(DevForgeEvents.API_REQUEST, handleApiRequest);
+      socket.off(DevForgeEvents.API_RESPONSE, handleApiResponse);
     };
-  }, [user]);
+  }, [socket]);
 
   // 3. Trigger Mock Event Mutation
   const triggerMockMutation = useMutation({
@@ -101,12 +80,6 @@ export default function useDashboard() {
     }
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    queryClient.clear();
-    router.push("/login");
-  };
-
   return {
     user: user || null,
     isAuthLoading,
@@ -118,6 +91,5 @@ export default function useDashboard() {
     isExecuting: executeApiMutation.isPending,
     triggerMockEvent: () => triggerMockMutation.mutate(),
     executeApiHubRequest: () => executeApiMutation.mutate(),
-    handleLogout
   };
 }

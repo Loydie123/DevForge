@@ -9,9 +9,7 @@ import {
   QueryResultDto 
 } from "../../services/db-hub/db-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY } from "../../config/env";
-
-const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
+import { TOKEN_KEY, DEFAULT_PROJECT_ID } from "../../config/env";
 
 export default function useDbHub() {
   const router = useRouter();

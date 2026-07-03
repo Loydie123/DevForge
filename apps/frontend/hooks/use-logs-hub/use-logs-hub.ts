@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { io, Socket } from "socket.io-client";
 import { DevForgeEvents, LogPayload } from "@devforge/event-bus";
 import { logsHubService, ErrorLog } from "../../services/logs-hub/logs-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
-
-const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";
+import { DEFAULT_PROJECT_ID } from "../../config/env";
 
 export default function useLogsHub() {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, isAuthLoading } = useWorkspace();
+  const { user, isAuthLoading, isConnected, socket } = useWorkspace();
 
-  const socketRef = useRef<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [logsList, setLogsList] = useState<LogPayload[]>([]);
 
   // Console Filters
@@ -26,61 +19,43 @@ export default function useLogsHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
 
-  // Add Source Form states
+  // Form inputs
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
   const [sourceName, setSourceName] = useState("");
   const [sourcePath, setSourcePath] = useState("");
 
-  // Detailed error modal
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
 
-  // 2. Fetch Watched Log Sources
+  // 2. Fetch log sources list (poll every 10s)
   const { data: sources = [], isLoading: isLoadingSources } = useQuery({
     queryKey: ["log-sources"],
     queryFn: () => logsHubService.getSources(DEFAULT_PROJECT_ID),
     enabled: !!user,
+    refetchInterval: 10_000,
   });
 
-  // 3. Fetch Recorded Errors list
+  // 3. Fetch error logs list (poll every 10s)
   const { data: errorLogs = [], isLoading: isLoadingErrors } = useQuery({
     queryKey: ["error-logs"],
     queryFn: () => logsHubService.getErrorLogs(DEFAULT_PROJECT_ID),
     enabled: !!user,
+    refetchInterval: 10_000,
   });
 
-  // 4. WebSocket log listener
+  // 4. WebSocket log listener on the global socket
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!user || !token) return;
+    if (!socket) return;
 
-    const socketInstance = io(WS_GATEWAY_URL, {
-      transports: ["websocket"],
-      auth: { token },
-    });
-
-    socketInstance.on("connect", () => {
-      setIsConnected(true);
-      console.log("Logs Hub: Connected to WebSocket Gateway");
-    });
-
-    socketInstance.on("disconnect", () => {
-      setIsConnected(false);
-      console.log("Logs Hub: Disconnected from WebSocket Gateway");
-    });
-
-    // Listen to live logs stream
-    socketInstance.on(DevForgeEvents.LOG_CREATED, (data: LogPayload) => {
+    const handleLogCreated = (data: LogPayload) => {
       setLogsList((prev) => [data, ...prev].slice(0, 200));
-    });
+    };
 
-    socketRef.current = socketInstance;
+    socket.on(DevForgeEvents.LOG_CREATED, handleLogCreated);
 
     return () => {
-      if (socketInstance) {
-        socketInstance.disconnect();
-      }
+      socket.off(DevForgeEvents.LOG_CREATED, handleLogCreated);
     };
-  }, [user]);
+  }, [socket]);
 
   // 5. Add Log Source Mutation
   const addSourceMutation = useMutation({
@@ -90,10 +65,10 @@ export default function useLogsHub() {
       filePath: sourcePath,
     }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["log-sources"] });
+      setIsAddSourceOpen(false);
       setSourceName("");
       setSourcePath("");
-      setIsAddSourceOpen(false);
-      void queryClient.invalidateQueries({ queryKey: ["log-sources"] });
     },
     onError: (err) => {
       alert(err.message);
@@ -111,36 +86,36 @@ export default function useLogsHub() {
     }
   });
 
-  // 7. Delete Single Error Mutation
+  // 7. Delete Error Mutation
   const deleteErrorMutation = useMutation({
     mutationFn: (id: string) => logsHubService.deleteError(id),
     onSuccess: () => {
-      setSelectedError(null);
       void queryClient.invalidateQueries({ queryKey: ["error-logs"] });
+      setSelectedError(null);
     },
     onError: (err) => {
       alert(err.message);
     }
   });
 
-  // 8. Clear All Errors Mutation
+  // 8. Clear Errors Mutation
   const clearErrorsMutation = useMutation({
     mutationFn: () => logsHubService.clearErrors(DEFAULT_PROJECT_ID),
     onSuccess: () => {
-      setSelectedError(null);
       void queryClient.invalidateQueries({ queryKey: ["error-logs"] });
+      setSelectedError(null);
     },
     onError: (err) => {
       alert(err.message);
     }
   });
 
-  // Derived filtered logs
+  // Filter logs logic
   const filteredLogs = logsList.filter((log) => {
-    const serviceMatch = serviceFilter === "all" || log.service.toLowerCase() === serviceFilter.toLowerCase();
-    const levelMatch = levelFilter === "all" || log.level.toLowerCase() === levelFilter.toLowerCase();
-    const textMatch = !searchQuery.trim() || log.message.toLowerCase().includes(searchQuery.toLowerCase());
-    return serviceMatch && levelMatch && textMatch;
+    const matchesService = serviceFilter === "all" || log.service.toLowerCase() === serviceFilter.toLowerCase();
+    const matchesLevel = levelFilter === "all" || log.level.toLowerCase() === levelFilter.toLowerCase();
+    const matchesSearch = !searchQuery || log.message.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesService && matchesLevel && matchesSearch;
   });
 
   // Download filtered logs stream
@@ -157,12 +132,6 @@ export default function useLogsHub() {
     link.download = `devforge-logs-${Date.now()}.txt`;
     link.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    queryClient.clear();
-    router.push("/login");
   };
 
   return {
@@ -207,6 +176,5 @@ export default function useLogsHub() {
     // Console trigger actions
     handleClearConsole: () => setLogsList([]),
     handleDownloadLogs,
-    handleLogout
   };
 }

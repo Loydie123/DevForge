@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import useLogsHub from "../../../hooks/use-logs-hub/use-logs-hub";
-import { useWorkspace } from "../../../components/workspace-context";
 import SourcesSidebar from "./sources-sidebar";
 import LogsConsole from "./logs-console";
 
 export default function LogsHub() {
   const {
-    isAuthLoading,
-    isConnected,
     logs,
     rawLogsLength,
 
@@ -43,21 +39,6 @@ export default function LogsHub() {
     handleClearConsole,
     handleDownloadLogs,
   } = useLogsHub();
-
-  const { setIsConnected } = useWorkspace();
-
-  useEffect(() => {
-    setIsConnected(isConnected);
-  }, [isConnected, setIsConnected]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-[#07090e] text-white flex flex-col items-center justify-center gap-4">
-        <div className="h-8 w-8 rounded-full border-4 border-slate-800 border-t-emerald-400 animate-spin" />
-        <span className="font-mono text-xs text-slate-400">Authenticating log session...</span>
-      </div>
-    );
-  }
 
   return (
     <>

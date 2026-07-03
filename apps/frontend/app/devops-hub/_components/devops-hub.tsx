@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import useDevopsHub from "../../../hooks/use-devops-hub/use-devops-hub";
-import { useWorkspace } from "../../../components/workspace-context";
 import ContainersPanel from "./containers-panel";
 
 export default function DevopsHub() {
   const {
-    isAuthLoading,
-    isConnected,
     enrichedContainers,
     isLoadingContainers,
     refetchContainers,
@@ -19,22 +15,8 @@ export default function DevopsHub() {
     handleAction,
     isActioning,
     actionFeedback,
+    isConnected,
   } = useDevopsHub();
-
-  const { setIsConnected } = useWorkspace();
-
-  useEffect(() => {
-    setIsConnected(isConnected);
-  }, [isConnected, setIsConnected]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-[#07090e] text-white flex flex-col items-center justify-center gap-4">
-        <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-        <p className="text-sm font-mono text-slate-400">Authenticating...</p>
-      </div>
-    );
-  }
 
   const runningCount = enrichedContainers.filter(
     (c) => c.State?.toLowerCase() === "running"

@@ -1,15 +1,12 @@
 "use client";
 
 import useApiHub from "../_hooks/use-api-hub";
-import { useEffect } from "react";
-import { useWorkspace } from "../../../components/workspace-context";
 import CollectionsSidebar from "./collections-sidebar";
 import RequestPanel from "./request-panel";
 import ResponsePanel from "./response-panel";
 
 export default function ApiHub() {
   const {
-    isAuthLoading,
     collections,
     history,
     isLoadingLists,
@@ -52,21 +49,6 @@ export default function ApiHub() {
     loadHistoryItemIntoComposer,
     handleClearHistory,
   } = useApiHub();
-
-  const { setIsConnected } = useWorkspace();
-
-  useEffect(() => {
-    setIsConnected(true);
-  }, [setIsConnected]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-slate-400 gap-3">
-        <div className="h-6 w-6 rounded-full border-2 border-slate-800 border-t-emerald-400 animate-spin" />
-        <span className="text-sm font-mono">Initializing API Hub...</span>
-      </div>
-    );
-  }
 
   return (
     <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-6 min-h-0">

@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { io, Socket } from "socket.io-client";
 import { DevForgeEvents } from "@devforge/event-bus";
 import {
   devopsHubService,
@@ -11,7 +10,6 @@ import {
   ContainerAction,
 } from "../../services/devops-hub/devops-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
 export interface LiveContainerMetric {
   Container: string;
@@ -25,10 +23,8 @@ export interface LiveContainerMetric {
 
 export default function useDevopsHub() {
   const queryClient = useQueryClient();
-  const socketRef = useRef<Socket | null>(null);
-  const { user, isAuthLoading } = useWorkspace();
+  const { user, isAuthLoading, isConnected, socket } = useWorkspace();
 
-  const [isConnected, setIsConnected] = useState(false);
   const [liveMetrics, setLiveMetrics] = useState<
     Record<string, LiveContainerMetric>
   >({});
@@ -37,6 +33,7 @@ export default function useDevopsHub() {
     message: string;
     success: boolean;
   } | null>(null);
+
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(
     null
   );
@@ -103,35 +100,22 @@ export default function useDevopsHub() {
 
   // 5. WebSocket — listen for live METRIC_UPDATED events
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (!user || !token) return;
+    if (!socket) return;
 
-    const socketInstance = io(WS_GATEWAY_URL, {
-      transports: ["websocket"],
-      auth: { token },
-    });
+    const handleMetricUpdated = (payload: { containers: LiveContainerMetric[]; timestamp: number }) => {
+      const metricMap: Record<string, LiveContainerMetric> = {};
+      payload.containers.forEach((m) => {
+        metricMap[m.Container] = m;
+      });
+      setLiveMetrics(metricMap);
+    };
 
-    socketInstance.on("connect", () => setIsConnected(true));
-    socketInstance.on("disconnect", () => setIsConnected(false));
-
-    socketInstance.on(
-      DevForgeEvents.METRIC_UPDATED,
-      (payload: { containers: LiveContainerMetric[]; timestamp: number }) => {
-        const metricMap: Record<string, LiveContainerMetric> = {};
-        payload.containers.forEach((m) => {
-          metricMap[m.Container] = m;
-        });
-        setLiveMetrics(metricMap);
-      }
-    );
-
-    socketRef.current = socketInstance;
+    socket.on(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
 
     return () => {
-      socketInstance.disconnect();
-      socketRef.current = null;
+      socket.off(DevForgeEvents.METRIC_UPDATED, handleMetricUpdated);
     };
-  }, [user]);
+  }, [socket]);
 
   // Helper: merge live metrics into containers
   const enrichedContainers = containers.map((c: DockerContainer) => ({
