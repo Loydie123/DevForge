@@ -23,6 +23,7 @@ export default function useLogsHub() {
   const [isAddSourceOpen, setIsAddSourceOpen] = useState(false);
   const [sourceName, setSourceName] = useState("");
   const [sourcePath, setSourcePath] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
 
@@ -69,9 +70,10 @@ export default function useLogsHub() {
       setIsAddSourceOpen(false);
       setSourceName("");
       setSourcePath("");
+      setFormError(null);
     },
     onError: (err) => {
-      alert(err.message);
+      setFormError(err.message);
     }
   });
 
@@ -82,7 +84,7 @@ export default function useLogsHub() {
       void queryClient.invalidateQueries({ queryKey: ["log-sources"] });
     },
     onError: (err) => {
-      alert(err.message);
+      console.error("Failed to delete log source:", err.message);
     }
   });
 
@@ -94,7 +96,7 @@ export default function useLogsHub() {
       setSelectedError(null);
     },
     onError: (err) => {
-      alert(err.message);
+      console.error("Failed to delete error log:", err.message);
     }
   });
 
@@ -106,9 +108,40 @@ export default function useLogsHub() {
       setSelectedError(null);
     },
     onError: (err) => {
-      alert(err.message);
+      console.error("Failed to clear error logs:", err.message);
     }
   });
+
+  const handleAddSource = () => {
+    setFormError(null);
+    if (!sourceName.trim()) {
+      setFormError("Source Name is required.");
+      return;
+    }
+    if (!sourcePath.trim()) {
+      setFormError("Log File Path is required.");
+      return;
+    }
+    addSourceMutation.mutate();
+  };
+
+  const handleDeleteSource = (id: string) => {
+    if (window.confirm("Are you sure you want to stop watching and delete this log source?")) {
+      deleteSourceMutation.mutate(id);
+    }
+  };
+
+  const handleDeleteError = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this recorded error?")) {
+      deleteErrorMutation.mutate(id);
+    }
+  };
+
+  const handleClearErrors = () => {
+    if (window.confirm("Are you sure you want to clear all recorded error logs?")) {
+      clearErrorsMutation.mutate();
+    }
+  };
 
   // Filter logs logic
   const filteredLogs = logsList.filter((log) => {
@@ -161,17 +194,21 @@ export default function useLogsHub() {
 
     // Form inputs
     isAddSourceOpen,
-    setIsAddSourceOpen,
+    setIsAddSourceOpen: (open: boolean) => {
+      setIsAddSourceOpen(open);
+      setFormError(null);
+    },
     sourceName,
     setSourceName,
     sourcePath,
     setSourcePath,
+    formError,
 
     // Mutate triggers
-    handleAddSource: () => addSourceMutation.mutate(),
-    handleDeleteSource: (id: string) => deleteSourceMutation.mutate(id),
-    handleDeleteError: (id: string) => deleteErrorMutation.mutate(id),
-    handleClearErrors: () => clearErrorsMutation.mutate(),
+    handleAddSource,
+    handleDeleteSource,
+    handleDeleteError,
+    handleClearErrors,
 
     // Console trigger actions
     handleClearConsole: () => setLogsList([]),

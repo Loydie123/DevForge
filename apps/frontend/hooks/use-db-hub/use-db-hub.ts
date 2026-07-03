@@ -35,6 +35,7 @@ export default function useDbHub() {
   const [formPassword, setFormPassword] = useState("");
   
   const [testFeedback, setTestFeedback] = useState<{ success: boolean; message: string } | null>(null);
+  const [formValidationError, setFormValidationError] = useState<string | null>(null);
 
   // 2. Fetch Connection Profiles
   const { data: connections = [], isLoading: isLoadingConnections } = useQuery({
@@ -59,6 +60,7 @@ export default function useDbHub() {
     setQueryInput(null);
     setQueryResult(null);
     setExecutionError(null);
+    setFormValidationError(null);
   };
 
   // 3. Fetch History Timeline for active connection
@@ -112,6 +114,7 @@ export default function useDbHub() {
       setFormUsername("");
       setFormPassword("");
       setTestFeedback(null);
+      setFormValidationError(null);
       setIsAddFormOpen(false);
 
       // Invalidate connection list to refetch
@@ -119,7 +122,7 @@ export default function useDbHub() {
       setActiveConnectionId(newConn.id);
     },
     onError: (err) => {
-      alert(err.message);
+      setFormValidationError(err.message);
     }
   });
 
@@ -133,7 +136,7 @@ export default function useDbHub() {
       void queryClient.invalidateQueries({ queryKey: ["db-connections"] });
     },
     onError: (err) => {
-      alert(err.message);
+      console.error("Failed to delete connection profile:", err.message);
     }
   });
 
@@ -159,14 +162,46 @@ export default function useDbHub() {
       void queryClient.invalidateQueries({ queryKey: ["db-history", activeConnection?.id] });
     },
     onError: (err) => {
-      alert(err.message);
+      console.error("Failed to clear query history:", err.message);
     }
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    queryClient.clear();
-    router.push("/login");
+  const handleSaveConnection = () => {
+    setFormValidationError(null);
+    if (!formName.trim()) {
+      setFormValidationError("Profile Name is required.");
+      return;
+    }
+    if (!formHost.trim()) {
+      setFormValidationError("Host address is required.");
+      return;
+    }
+    if (isNaN(Number(formPort)) || Number(formPort) <= 0) {
+      setFormValidationError("Valid port number is required.");
+      return;
+    }
+    if (!formDatabase.trim()) {
+      setFormValidationError("Database Name is required.");
+      return;
+    }
+    if (!formUsername.trim()) {
+      setFormValidationError("Username is required.");
+      return;
+    }
+    saveConnMutation.mutate();
+  };
+
+  const handleDeleteConnection = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this database connection profile?")) {
+      deleteConnMutation.mutate(id);
+    }
+  };
+
+  const handleClearHistory = () => {
+    if (!activeConnection) return;
+    if (window.confirm("Are you sure you want to clear the query history timeline for this connection?")) {
+      clearHistoryMutation.mutate();
+    }
   };
 
   return {
@@ -189,7 +224,11 @@ export default function useDbHub() {
 
     // Connections UI state
     isAddFormOpen,
-    setIsAddFormOpen,
+    setIsAddFormOpen: (open: boolean) => {
+      setIsAddFormOpen(open);
+      setFormValidationError(null);
+      setTestFeedback(null);
+    },
     formName,
     setFormName,
     formType,
@@ -204,6 +243,7 @@ export default function useDbHub() {
     setFormUsername,
     formPassword,
     setFormPassword,
+    formValidationError,
     
     // Testing & Saving Mutations
     isTestingConnection: testConnMutation.isPending,
@@ -211,9 +251,8 @@ export default function useDbHub() {
     testFeedback,
     setTestFeedback,
     handleTestConnection: () => testConnMutation.mutate(),
-    handleSaveConnection: () => saveConnMutation.mutate(),
-    handleDeleteConnection: (id: string) => deleteConnMutation.mutate(id),
-    handleClearHistory: () => clearHistoryMutation.mutate(),
-    handleLogout
+    handleSaveConnection,
+    handleDeleteConnection,
+    handleClearHistory,
   };
 }

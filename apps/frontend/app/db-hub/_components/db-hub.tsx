@@ -49,6 +49,7 @@ export default function DbHub() {
     handleSaveConnection,
     handleDeleteConnection,
     handleClearHistory,
+    formValidationError,
   } = useDbHub();
 
   return (
@@ -97,6 +98,7 @@ export default function DbHub() {
             isSavingConnection={isSavingConnection}
             testFeedback={testFeedback}
             setTestFeedback={setTestFeedback}
+            formValidationError={formValidationError}
             handleTestConnection={handleTestConnection}
             handleSaveConnection={handleSaveConnection}
             handleDeleteConnection={handleDeleteConnection}

@@ -305,15 +305,29 @@ export default function useApiHub() {
     newCollectionName,
     setNewCollectionName,
     isCreatingCollection: createColMutation.isPending,
-    handleCreateCollection: () => createColMutation.mutate(),
-    handleDeleteCollection: (id: string) => deleteColMutation.mutate(id),
+    handleCreateCollection: () => {
+      if (!newCollectionName.trim()) return;
+      createColMutation.mutate();
+    },
+    handleDeleteCollection: (id: string) => {
+      if (window.confirm("Are you sure you want to delete this collection and all its saved requests?")) {
+        deleteColMutation.mutate(id);
+      }
+    },
     handleSaveRequest: (collectionId: string, name: string) => saveReqMutation.mutate({ collectionId, name }),
-    handleDeleteRequest: (id: string) => deleteReqMutation.mutate(id),
+    handleDeleteRequest: (id: string) => {
+      if (window.confirm("Are you sure you want to delete this saved request?")) {
+        deleteReqMutation.mutate(id);
+      }
+    },
     
     // Loader actions
     loadSavedRequestIntoComposer,
     loadHistoryItemIntoComposer,
-    handleClearHistory: () => clearHistoryMutation.mutate(),
-    handleLogout
+    handleClearHistory: () => {
+      if (window.confirm("Are you sure you want to clear your entire API request history?")) {
+        clearHistoryMutation.mutate();
+      }
+    },
   };
 }

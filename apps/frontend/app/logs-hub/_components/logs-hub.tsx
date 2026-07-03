@@ -38,6 +38,7 @@ export default function LogsHub() {
     handleClearErrors,
     handleClearConsole,
     handleDownloadLogs,
+    formError,
   } = useLogsHub();
 
   return (
@@ -85,6 +86,7 @@ export default function LogsHub() {
             handleDeleteSource={handleDeleteSource}
             handleDeleteError={handleDeleteError}
             handleClearErrors={handleClearErrors}
+            formError={formError}
           />
 
           {/* Right panel: Live Logs Terminal View */}

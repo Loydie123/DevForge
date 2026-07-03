@@ -22,6 +22,7 @@ interface SourcesSidebarProps {
   handleDeleteError: (id: string) => void;
   handleClearErrors: () => void;
   setSelectedError: (error: ErrorLog | null) => void;
+  formError: string | null;
 }
 
 export default function SourcesSidebar({
@@ -42,6 +43,7 @@ export default function SourcesSidebar({
   handleDeleteError,
   handleClearErrors,
   setSelectedError,
+  formError,
 }: SourcesSidebarProps) {
   const [activeTab, setActiveTab] = useState<"sources" | "errors">("sources");
 
@@ -117,6 +119,12 @@ export default function SourcesSidebar({
               />
             </div>
 
+            {formError && (
+              <div className="p-2 border bg-rose-500/5 text-rose-400 border-rose-500/25 text-[10px] rounded-lg leading-relaxed">
+                🔴 Error: {formError}
+              </div>
+            )}
+
             <button
               onClick={handleAddSource}
               disabled={!sourceName.trim() || !sourcePath.trim()}
@@ -159,7 +167,7 @@ export default function SourcesSidebar({
                       </span>
                     </div>
                     <button
-                      onClick={() => confirm(`Delete log watcher "${src.name}"?`) && handleDeleteSource(src.id)}
+                      onClick={() => handleDeleteSource(src.id)}
                       className="opacity-0 group-hover:opacity-100 h-6 w-6 text-[10px] bg-slate-900 border border-slate-800 hover:border-slate-700 text-rose-400 rounded-lg flex items-center justify-center cursor-pointer transition-all"
                     >
                       🗑️

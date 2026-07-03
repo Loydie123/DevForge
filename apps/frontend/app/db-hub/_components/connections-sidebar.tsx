@@ -33,6 +33,7 @@ interface ConnectionsSidebarProps {
   isSavingConnection: boolean;
   testFeedback: { success: boolean; message: string } | null;
   setTestFeedback: (feedback: { success: boolean; message: string } | null) => void;
+  formValidationError: string | null;
   handleTestConnection: () => void;
   handleSaveConnection: () => void;
   handleDeleteConnection: (id: string) => void;
@@ -68,6 +69,7 @@ export default function ConnectionsSidebar({
   isSavingConnection,
   testFeedback,
   setTestFeedback,
+  formValidationError,
   handleTestConnection,
   handleSaveConnection,
   handleDeleteConnection,
@@ -208,6 +210,13 @@ export default function ConnectionsSidebar({
                 className="h-8 px-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-750 focus:border-emerald-500 focus:outline-none text-[11px] text-white"
               />
             </div>
+
+            {/* Form validation error block */}
+            {formValidationError && (
+              <div className="p-2.5 rounded-lg border bg-rose-500/5 text-rose-400 border-rose-500/25 text-[10px] leading-relaxed">
+                🔴 Error: {formValidationError}
+              </div>
+            )}
 
             {/* Test Connection feedback block */}
             {testFeedback && (
