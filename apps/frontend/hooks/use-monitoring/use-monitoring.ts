@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { io, Socket } from "socket.io-client";
 import { DevForgeEvents } from "@devforge/event-bus";
@@ -9,7 +8,7 @@ import {
   monitoringService,
   SystemMetrics,
   UptimeCheck,
-} from "../../services/monitoring-service";
+} from "../../services/monitoring/monitoring-service";
 import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
@@ -29,7 +28,6 @@ interface LiveUptimeUpdate {
 }
 
 export default function useMonitoring() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
   const { user, isAuthLoading } = useWorkspace();

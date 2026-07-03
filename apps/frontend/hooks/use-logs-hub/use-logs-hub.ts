@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { io, Socket } from "socket.io-client";
 import { DevForgeEvents, LogPayload } from "@devforge/event-bus";
-import { logsHubService, ErrorLog } from "../../services/logs-hub-service";
+import { logsHubService, ErrorLog } from "../../services/logs-hub/logs-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 

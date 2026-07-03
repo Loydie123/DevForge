@@ -1,6 +1,6 @@
 "use client";
 
-import { DbConnection } from "../../../services/db-hub-service";
+import { DbConnection } from "../../../services/db-hub/db-hub-service";
 
 interface SqlComposerProps {
   activeConnection: DbConnection | null;

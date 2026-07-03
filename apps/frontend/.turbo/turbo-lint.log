@@ -1,19 +1,1 @@
 $ eslint
-
-C:\Users\gomez\devforge\apps\frontend\hooks\use-admin\use-admin.ts
-  8:10  warning  'TOKEN_KEY' is defined but never used  @typescript-eslint/no-unused-vars
-
-C:\Users\gomez\devforge\apps\frontend\hooks\use-dashboard\use-dashboard.ts
-  5:10  warning  'useQuery' is defined but never used  @typescript-eslint/no-unused-vars
-
-C:\Users\gomez\devforge\apps\frontend\hooks\use-db-hub\use-db-hub.ts
-  3:10  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
-
-C:\Users\gomez\devforge\apps\frontend\hooks\use-devops-hub\use-devops-hub.ts
-  28:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
-
-C:\Users\gomez\devforge\apps\frontend\hooks\use-monitoring\use-monitoring.ts
-  32:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
-
-✖ 5 problems (0 errors, 5 warnings)
-

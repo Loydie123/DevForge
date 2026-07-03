@@ -1,8 +1,8 @@
 "use client";
 
-import { DockerContainer, DockerStats } from "../../../services/devops-hub-service";
+import { DockerContainer, DockerStats } from "../../../services/devops-hub/devops-hub-service";
 import { LiveContainerMetric } from "../../../hooks/use-devops-hub/use-devops-hub";
-import { ContainerAction } from "../../../services/devops-hub-service";
+import { ContainerAction } from "../../../services/devops-hub/devops-hub-service";
 
 interface EnrichedContainer extends DockerContainer {
   live: LiveContainerMetric | null;

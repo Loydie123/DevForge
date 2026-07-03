@@ -8,8 +8,8 @@ import {
   SaveRequestDto, 
   HistoryItem, 
   SavedRequest 
-} from "../../../services/api-hub-service";
-import { authService } from "../../../services/auth-service";
+} from "../../../services/api-hub/api-hub-service";
+import { authService } from "../../../services/auth/auth-service";
 import { TOKEN_KEY } from "../../../config/env";
 
 const DEFAULT_PROJECT_ID = "00000000-0000-0000-0000-000000000000";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DbConnection, DbQueryHistoryItem } from "../../../services/db-hub-service";
+import { DbConnection, DbQueryHistoryItem } from "../../../services/db-hub/db-hub-service";
 
 interface ConnectionsSidebarProps {
   connections: DbConnection[];

@@ -1,6 +1,6 @@
 "use client";
 
-import { SystemMetrics } from "../../../services/monitoring-service";
+import { SystemMetrics } from "../../../services/monitoring/monitoring-service";
 import { formatBytes } from "../../../lib/utils";
 import GaugeRing from "../../../components/ui/gauge-ring";
 

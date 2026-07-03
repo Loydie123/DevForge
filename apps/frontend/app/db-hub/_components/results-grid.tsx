@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { QueryResultDto } from "../../../services/db-hub-service";
+import { QueryResultDto } from "../../../services/db-hub/db-hub-service";
 
 interface ResultsGridProps {
   queryResult: QueryResultDto | null;

@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authService } from "../../services/auth-service";
+import { authService } from "../../services/auth/auth-service";
 import { TOKEN_KEY } from "../../config/env";
 
 export default function useRegister() {

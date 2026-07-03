@@ -20,7 +20,8 @@ export default function GaugeRing({
   const circumference = 2 * Math.PI * radius;
   
   // Safe math clamp to avoid NaN or invalid SVG values
-  const clampedValue = Math.min(Math.max(value, 0), 100);
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const clampedValue = Math.min(Math.max(safeValue, 0), 100);
   const offset = circumference - (clampedValue / 100) * circumference;
 
   return (

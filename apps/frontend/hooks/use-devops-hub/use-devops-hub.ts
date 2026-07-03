@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { io, Socket } from "socket.io-client";
 import { DevForgeEvents } from "@devforge/event-bus";
@@ -10,7 +9,7 @@ import {
   DockerContainer,
   DockerStats,
   ContainerAction,
-} from "../../services/devops-hub-service";
+} from "../../services/devops-hub/devops-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY, WS_GATEWAY_URL } from "../../config/env";
 
@@ -25,7 +24,6 @@ export interface LiveContainerMetric {
 }
 
 export default function useDevopsHub() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
   const { user, isAuthLoading } = useWorkspace();

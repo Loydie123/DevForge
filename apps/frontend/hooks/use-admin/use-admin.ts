@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminService, AdminUser } from "../../services/admin-service";
+import { adminService, AdminUser } from "../../services/admin/admin-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY } from "../../config/env";
 
 export default function useAdmin() {
   const router = useRouter();

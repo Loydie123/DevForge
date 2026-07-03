@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogSource, ErrorLog } from "../../../services/logs-hub-service";
+import { LogSource, ErrorLog } from "../../../services/logs-hub/logs-hub-service";
 
 interface SourcesSidebarProps {
   sources: LogSource[];

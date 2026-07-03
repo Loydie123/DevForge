@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   dbHubService, 
   DbConnection, 
   QueryResultDto 
-} from "../../services/db-hub-service";
+} from "../../services/db-hub/db-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
 import { TOKEN_KEY } from "../../config/env";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Collection, HistoryItem, SavedRequest } from "../../../services/api-hub-service";
+import { Collection, HistoryItem, SavedRequest } from "../../../services/api-hub/api-hub-service";
 
 interface CollectionsSidebarProps {
   collections: Collection[];

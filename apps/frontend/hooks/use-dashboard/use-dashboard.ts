@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { io, Socket } from "socket.io-client";
 import {
   DevForgeEvents,
@@ -13,7 +13,7 @@ import {
 } from "@devforge/event-bus";
 
 import { useWorkspace } from "../../components/workspace-context";
-import { apiService } from "../../services/api-service";
+import { apiService } from "../../services/dashboard/api-service";
 import { WS_GATEWAY_URL, TOKEN_KEY } from "../../config/env";
 
 export default function useDashboard() {

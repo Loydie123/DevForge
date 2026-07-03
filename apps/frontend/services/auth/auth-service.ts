@@ -1,4 +1,4 @@
-import { apiClient } from "./api-client";
+import { apiClient } from "../api-client";
 import { UserProfile, AuthResponse } from "@devforge/auth";
 
 export type { UserProfile, AuthResponse };

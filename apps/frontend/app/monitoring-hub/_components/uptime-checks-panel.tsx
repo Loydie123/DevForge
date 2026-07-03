@@ -1,6 +1,6 @@
 "use client";
 
-import { UptimeCheck } from "../../../services/monitoring-service";
+import { UptimeCheck } from "../../../services/monitoring/monitoring-service";
 
 function statusDot(status: string) {
   switch (status) {
