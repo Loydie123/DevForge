@@ -62,7 +62,7 @@ export default function useApiHub() {
       localStorage.removeItem(TOKEN_KEY);
       router.push("/login");
     }
-  }, [authError, router]);
+  }, [authError]);
 
   // Check token presence on mount
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function useApiHub() {
     if (!token) {
       router.push("/login");
     }
-  }, [router]);
+  }, []);
 
   // 2. Fetch Collections via React Query
   const { data: collections = [], isLoading: isLoadingCollections } = useQuery({
@@ -240,12 +240,6 @@ export default function useApiHub() {
     } catch {
       setHeaders([{ key: "", value: "" }]);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    queryClient.clear();
-    router.push("/login");
   };
 
   const getStatusText = (code: number) => {

@@ -11,6 +11,7 @@ import { DevOpsModule } from './devops/devops.module';
 import { AuthModule } from './auth/auth.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { AdminModule } from './admin/admin.module';
+import { ProjectGeneratorModule } from './project-generator/project-generator.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     MonitoringModule,
     AdminModule,
+    ProjectGeneratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

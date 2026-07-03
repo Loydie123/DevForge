@@ -1,1 +1,8 @@
 $ eslint
+
+C:\Users\gomez\devforge\apps\frontend\app\api-hub\_hooks\use-api-hub.ts
+  65:6  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  73:6  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 2 problems (0 errors, 2 warnings)
+

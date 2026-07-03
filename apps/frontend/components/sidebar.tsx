@@ -55,6 +55,17 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "Generator",
+    href: "/project-generator",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.25 13.5h3.86a2.25 2.25 0 012.008 1.24l.885 1.77a2.25 2.25 0 002.007 1.24h1.98a2.25 2.25 0 002.007-1.24l.885-1.77a2.25 2.25 0 012.007-1.24h3.86m-18 0h18M2.25 13.5l1.626-5.69A2.25 2.25 0 016.023 6.25h11.954a2.25 2.25 0 012.147 1.56l1.626 5.69M2.25 13.5v5.25A2.25 2.25 0 004.5 21h15a2.25 2.25 0 002.25-2.25V13.5m-10.5-6h3m-3 3h6"
+      />
+    ),
+  },
+  {
     label: "DevOps Hub",
     href: "/devops-hub",
     icon: (

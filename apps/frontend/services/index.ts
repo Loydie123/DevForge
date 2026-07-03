@@ -10,3 +10,4 @@ export { dbHubService } from "./db-hub/db-hub-service";
 export { devopsHubService } from "./devops-hub/devops-hub-service";
 export { logsHubService } from "./logs-hub/logs-hub-service";
 export { monitoringService } from "./monitoring/monitoring-service";
+export { projectGeneratorService } from "./project-generator/project-generator-service";

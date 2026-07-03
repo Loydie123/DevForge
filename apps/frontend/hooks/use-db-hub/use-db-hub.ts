@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   dbHubService, 
@@ -9,10 +8,9 @@ import {
   QueryResultDto 
 } from "../../services/db-hub/db-hub-service";
 import { useWorkspace } from "../../components/workspace-context";
-import { TOKEN_KEY, DEFAULT_PROJECT_ID } from "../../config/env";
+import { DEFAULT_PROJECT_ID } from "../../config/env";
 
 export default function useDbHub() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { user, isAuthLoading } = useWorkspace();
 
