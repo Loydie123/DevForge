@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { AdminModule } from './admin/admin.module';
 import { ProjectGeneratorModule } from './project-generator/project-generator.module';
+import { AiEngineModule } from './ai-engine/ai-engine.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProjectGeneratorModule } from './project-generator/project-generator.mo
     MonitoringModule,
     AdminModule,
     ProjectGeneratorModule,
+    AiEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

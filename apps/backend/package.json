@@ -30,6 +30,7 @@
     "@devforge/monitoring-hub": "workspace:*",
     "@devforge/permissions": "workspace:*",
     "@devforge/project-generator": "workspace:*",
+    "@devforge/ai-engine": "workspace:*",
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",

@@ -62,7 +62,7 @@ export default function useApiHub() {
       localStorage.removeItem(TOKEN_KEY);
       router.push("/login");
     }
-  }, [authError]);
+  }, [authError, router]);
 
   // Check token presence on mount
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function useApiHub() {
     if (!token) {
       router.push("/login");
     }
-  }, []);
+  }, [router]);
 
   // 2. Fetch Collections via React Query
   const { data: collections = [], isLoading: isLoadingCollections } = useQuery({

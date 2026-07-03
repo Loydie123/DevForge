@@ -11,3 +11,4 @@ export { devopsHubService } from "./devops-hub/devops-hub-service";
 export { logsHubService } from "./logs-hub/logs-hub-service";
 export { monitoringService } from "./monitoring/monitoring-service";
 export { projectGeneratorService } from "./project-generator/project-generator-service";
+export { aiEngineService } from "./ai-engine/ai-engine-service";

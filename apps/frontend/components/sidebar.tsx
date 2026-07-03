@@ -66,6 +66,17 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "AI Engine",
+    href: "/ai-engine",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904L9 21m0 0l-.813-5.096M9 21h3m-3 0H6m9.813-5.096A4.001 4.001 0 0012 8a4.001 4.001 0 00-3.813 2.904M15 11h.008v.008H15V11zm-6 0h.008v.008H9V11zm3-3H6.023a1.5 1.5 0 00-1.5 1.5V18a1.5 1.5 0 001.5 1.5H12m0-11h5.977a1.5 1.5 0 011.5 1.5V18a1.5 1.5 0 01-1.5 1.5H12m0-11v11"
+      />
+    ),
+  },
+  {
     label: "DevOps Hub",
     href: "/devops-hub",
     icon: (

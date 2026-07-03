@@ -69,7 +69,15 @@ export default function ResultsGrid({
         ) : executionError ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 border border-rose-500/20 bg-rose-500/5 rounded-xl font-mono text-xs text-rose-400 gap-2 overflow-y-auto">
             <span className="text-lg">⚠️ Query Execution Failed</span>
-            <p className="text-center">{executionError}</p>
+            <p className="text-center mb-1">{executionError}</p>
+            <button
+              onClick={() => {
+                window.location.href = `/ai-engine?mode=explain&context=${encodeURIComponent(executionError)}`;
+              }}
+              className="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm select-none"
+            >
+              🤖 Explain with AI
+            </button>
           </div>
         ) : queryResult ? (
           <div className="flex-1 flex flex-col min-h-0">
