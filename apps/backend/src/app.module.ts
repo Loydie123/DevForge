@@ -14,6 +14,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
 import { AdminModule } from './admin/admin.module';
 import { ProjectGeneratorModule } from './project-generator/project-generator.module';
 import { AiEngineModule } from './ai-engine/ai-engine.module';
+import { ErrorTrackerModule } from './error-tracker/error-tracker.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AiEngineModule } from './ai-engine/ai-engine.module';
     AdminModule,
     ProjectGeneratorModule,
     AiEngineModule,
+    ErrorTrackerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
