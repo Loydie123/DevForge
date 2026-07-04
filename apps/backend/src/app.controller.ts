@@ -15,6 +15,17 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('health')
+  health() {
+    return {
+      status: 'ok',
+      app: 'DevForge',
+      version: '0.1.0',
+      uptime: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   @Get('trigger-mock')
   triggerMock() {
     const mockLog: LogPayload = {
