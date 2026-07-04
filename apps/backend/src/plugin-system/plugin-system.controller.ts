@@ -6,10 +6,13 @@ import {
   Param,
   Body,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
 import { PluginSystemService } from './plugin-system.service';
 import type { PluginHook } from '@devforge/plugin-engine';
 
+@UseGuards(AuthGuard)
 @Controller('plugin-system')
 export class PluginSystemController {
   constructor(private readonly pluginService: PluginSystemService) {}

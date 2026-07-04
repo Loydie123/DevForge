@@ -6,8 +6,11 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '../auth/auth.guard';
 import { EnvManagerService } from './env-manager.service';
+
 import type { EnvType, SecretType } from '@devforge/env-manager';
 
 interface CreateConfigDto {
@@ -38,6 +41,7 @@ interface UpdateVariableDto {
   description?: string;
 }
 
+@UseGuards(AuthGuard)
 @Controller('env-manager')
 export class EnvManagerController {
   constructor(private readonly envService: EnvManagerService) {}
