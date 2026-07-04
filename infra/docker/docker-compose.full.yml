@@ -1,0 +1,102 @@
+# DevForge — Full Stack Production Compose
+# Usage: docker compose -f docker-compose.full.yml up -d
+# Starts all services: Postgres, Redis, Backend (NestJS), Frontend (Next.js), Nginx
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: devforge-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-devforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devforge_secure_pass_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-devforge}
+    volumes:
+      - devforge-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-devforge}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - devforge-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: devforge-redis
+    volumes:
+      - devforge-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - devforge-network
+
+  backend:
+    build:
+      context: ../../apps/backend
+      dockerfile: Dockerfile
+    container_name: devforge-backend
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-devforge}:${POSTGRES_PASSWORD:-devforge_secure_pass_2026}@postgres:5432/${POSTGRES_DB:-devforge}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - devforge-network
+
+  frontend:
+    build:
+      context: ../../apps/frontend
+      dockerfile: Dockerfile
+    container_name: devforge-frontend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:4000}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - devforge-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: devforge-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - devforge-network
+
+volumes:
+  devforge-db-data:
+  devforge-redis-data:
+
+networks:
+  devforge-network:
+    driver: bridge

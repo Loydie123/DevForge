@@ -1,3 +1,8 @@
+# DevForge — Dev Dependencies Only
+# Usage: docker compose up -d
+# Starts Postgres + Redis for local development.
+# Run backend and frontend separately with: pnpm dev
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -10,16 +15,26 @@ services:
       POSTGRES_DB: devforge
     volumes:
       - devforge-db-data:/var/lib/postgresql/data
-    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: devforge-redis
     ports:
       - "6379:6379"
     volumes:
       - devforge-redis-data:/data
-    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
   devforge-db-data:
