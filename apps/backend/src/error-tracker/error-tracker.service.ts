@@ -102,6 +102,6 @@ export class ErrorTrackerService {
       select: { service: true },
       distinct: ['service'],
     });
-    return rows.map((r) => r.service);
+    return rows.map((r: { service: string }) => r.service);
   }
 }

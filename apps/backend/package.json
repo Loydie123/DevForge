@@ -24,6 +24,7 @@
     "@devforge/ai-engine": "workspace:*",
     "@devforge/error-tracker": "workspace:*",
     "@devforge/analytics-hub": "workspace:*",
+    "@devforge/performance-hub": "workspace:*",
     "@devforge/security-center": "workspace:*",
     "@devforge/api-hub": "workspace:*",
     "@devforge/auth": "workspace:*",

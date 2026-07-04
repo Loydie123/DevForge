@@ -18,6 +18,7 @@ import { ErrorTrackerModule } from './error-tracker/error-tracker.module';
 import { SecurityCenterModule } from './security-center/security-center.module';
 import { SecurityMiddleware } from './security-center/security.middleware';
 import { AnalyticsHubModule } from './analytics-hub/analytics-hub.module';
+import { PerformanceHubModule } from './performance-hub/performance-hub.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AnalyticsHubModule } from './analytics-hub/analytics-hub.module';
     ErrorTrackerModule,
     SecurityCenterModule,
     AnalyticsHubModule,
+    PerformanceHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],
