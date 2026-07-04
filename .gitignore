@@ -45,3 +45,6 @@ next-env.d.ts
 .turbo/
 dist/
 **/dist/
+
+# pnpm store (content-addressable cache - never commit)
+.pnpm-store/
