@@ -1,6 +1,11 @@
-"use client";
-
+import type { Metadata } from "next";
 import AiConsole from "./_components/ai-console";
+
+export const metadata: Metadata = {
+  title: "AI Engine",
+  description: "Generate CRUD APIs, SQL schemas, explain errors and refactor code using AI.",
+};
+
 
 export default function AiEnginePage() {
   return (

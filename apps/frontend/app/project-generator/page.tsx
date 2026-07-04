@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import GeneratorForm from "./_components/generator-form";
+
+export const metadata: Metadata = {
+  title: "Project Generator",
+  description: "Bootstrap NestJS, Next.js, Django, Laravel and more with auth, DB, and Docker included.",
+};
 
 export default function ProjectGeneratorPage() {
   return (
