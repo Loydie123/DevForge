@@ -5,7 +5,6 @@ import {
   PipelineRun,
   RunStage,
   CicdStats,
-  PipelineStatus,
   RunTrigger,
 } from '@devforge/cicd-hub';
 
@@ -45,10 +44,29 @@ const STAGE_LOGS: Record<string, string[]> = {
 };
 
 const FAIL_LOGS: Record<string, string[]> = {
-  install: ['📦 Installing dependencies...', '❌ Error: ERESOLVE unable to resolve dependency tree', 'npm ERR! Conflicting peer dependency'],
-  build: ['🔨 Building project...', '✓ Compiling TypeScript', '❌ Error TS2307: Cannot find module', '✗ Build failed'],
-  test: ['🧪 Running test suite...', '✓ Unit tests: 38 passed', '✗ Integration tests: 2 failed', '❌ Test suite failed'],
-  deploy: ['🚀 Deploying to production...', '✓ Pushing Docker image', '❌ Health check timed out after 30s', '✗ Rollback initiated'],
+  install: [
+    '📦 Installing dependencies...',
+    '❌ Error: ERESOLVE unable to resolve dependency tree',
+    'npm ERR! Conflicting peer dependency',
+  ],
+  build: [
+    '🔨 Building project...',
+    '✓ Compiling TypeScript',
+    '❌ Error TS2307: Cannot find module',
+    '✗ Build failed',
+  ],
+  test: [
+    '🧪 Running test suite...',
+    '✓ Unit tests: 38 passed',
+    '✗ Integration tests: 2 failed',
+    '❌ Test suite failed',
+  ],
+  deploy: [
+    '🚀 Deploying to production...',
+    '✓ Pushing Docker image',
+    '❌ Health check timed out after 30s',
+    '✗ Rollback initiated',
+  ],
 };
 
 function uid(): string {
@@ -67,18 +85,61 @@ export class CicdHubService {
   private seedDefaults() {
     const now = Date.now();
 
-    const p1 = this.createPipelineSync('devforge-backend', 'main', DEFAULT_STAGES);
-    const p2 = this.createPipelineSync('devforge-frontend', 'main', ['install', 'build', 'deploy']);
-    const p3 = this.createPipelineSync('devforge-api-tests', 'develop', ['install', 'test']);
+    const p1 = this.createPipelineSync(
+      'devforge-backend',
+      'main',
+      DEFAULT_STAGES,
+    );
+    const p2 = this.createPipelineSync('devforge-frontend', 'main', [
+      'install',
+      'build',
+      'deploy',
+    ]);
+    const p3 = this.createPipelineSync('devforge-api-tests', 'develop', [
+      'install',
+      'test',
+    ]);
 
     // Seed historical runs so dashboard has data immediately
-    this.seedHistoricalRun(p1.id, p1.name, 'main', 'schedule', 'success', now - 3_600_000);
-    this.seedHistoricalRun(p2.id, p2.name, 'main', 'webhook', 'success', now - 7_200_000);
-    this.seedHistoricalRun(p3.id, p3.name, 'develop', 'manual', 'failed', now - 10_800_000);
-    this.seedHistoricalRun(p1.id, p1.name, 'main', 'manual', 'success', now - 86_400_000);
+    this.seedHistoricalRun(
+      p1.id,
+      p1.name,
+      'main',
+      'schedule',
+      'success',
+      now - 3_600_000,
+    );
+    this.seedHistoricalRun(
+      p2.id,
+      p2.name,
+      'main',
+      'webhook',
+      'success',
+      now - 7_200_000,
+    );
+    this.seedHistoricalRun(
+      p3.id,
+      p3.name,
+      'develop',
+      'manual',
+      'failed',
+      now - 10_800_000,
+    );
+    this.seedHistoricalRun(
+      p1.id,
+      p1.name,
+      'main',
+      'manual',
+      'success',
+      now - 86_400_000,
+    );
   }
 
-  private createPipelineSync(name: string, branch: string, stages: string[]): Pipeline {
+  private createPipelineSync(
+    name: string,
+    branch: string,
+    stages: string[],
+  ): Pipeline {
     const p: Pipeline = {
       id: uid(),
       name,
@@ -102,7 +163,10 @@ export class CicdHubService {
     const pipeline = this.pipelines.find((p) => p.id === pipelineId);
     if (!pipeline) return;
 
-    const failStageIdx = outcome === 'failed' ? Math.floor(Math.random() * pipeline.stages.length) : -1;
+    const failStageIdx =
+      outcome === 'failed'
+        ? Math.floor(Math.random() * pipeline.stages.length)
+        : -1;
     const stages: RunStage[] = pipeline.stages.map((name, idx) => {
       const isFail = idx === failStageIdx;
       const isSkipped = failStageIdx !== -1 && idx > failStageIdx;
@@ -114,7 +178,11 @@ export class CicdHubService {
         startedAt: stageStart,
         finishedAt: isSkipped ? undefined : stageStart + stageDur,
         durationMs: isSkipped ? undefined : stageDur,
-        logs: isSkipped ? [] : (isFail ? FAIL_LOGS[name] ?? [] : STAGE_LOGS[name] ?? []),
+        logs: isSkipped
+          ? []
+          : isFail
+            ? (FAIL_LOGS[name] ?? [])
+            : (STAGE_LOGS[name] ?? []),
       };
     });
 
@@ -157,9 +225,14 @@ export class CicdHubService {
     return p;
   }
 
-  async triggerRun(pipelineId: string, branch?: string, trigger: RunTrigger = 'manual'): Promise<PipelineRun> {
+  async triggerRun(
+    pipelineId: string,
+    branch?: string,
+    trigger: RunTrigger = 'manual',
+  ): Promise<PipelineRun> {
     const pipeline = this.pipelines.find((p) => p.id === pipelineId);
-    if (!pipeline) throw new NotFoundException(`Pipeline ${pipelineId} not found`);
+    if (!pipeline)
+      throw new NotFoundException(`Pipeline ${pipelineId} not found`);
 
     const runBranch = branch ?? pipeline.branch;
     const stages: RunStage[] = pipeline.stages.map((name) => ({
@@ -183,7 +256,10 @@ export class CicdHubService {
     if (this.runs.length > MAX_RUNS) this.runs = this.runs.slice(0, MAX_RUNS);
 
     pipeline.status = 'running';
-    this.eventEmitter.emit('cicd.run.started', { runId: run.id, pipelineName: pipeline.name });
+    this.eventEmitter.emit('cicd.run.started', {
+      runId: run.id,
+      pipelineName: pipeline.name,
+    });
 
     // Simulate async execution (non-blocking)
     void this.simulateExecution(run, pipeline);
@@ -193,7 +269,9 @@ export class CicdHubService {
 
   private async simulateExecution(run: PipelineRun, pipeline: Pipeline) {
     const shouldFail = Math.random() < 0.2; // 20% chance of failure
-    const failAtIdx = shouldFail ? Math.floor(Math.random() * run.stages.length) : -1;
+    const failAtIdx = shouldFail
+      ? Math.floor(Math.random() * run.stages.length)
+      : -1;
 
     for (let i = 0; i < run.stages.length; i++) {
       const stage = run.stages[i];
@@ -202,7 +280,9 @@ export class CicdHubService {
       stage.status = 'running';
       stage.startedAt = Date.now();
 
-      const logs = isFail ? (FAIL_LOGS[stage.name] ?? []) : (STAGE_LOGS[stage.name] ?? []);
+      const logs = isFail
+        ? (FAIL_LOGS[stage.name] ?? [])
+        : (STAGE_LOGS[stage.name] ?? []);
       const delay = 1500 + Math.random() * 2000;
 
       await new Promise((r) => setTimeout(r, delay));
@@ -213,7 +293,8 @@ export class CicdHubService {
       }
 
       stage.finishedAt = Date.now();
-      stage.durationMs = stage.finishedAt - (stage.startedAt ?? stage.finishedAt);
+      stage.durationMs =
+        stage.finishedAt - (stage.startedAt ?? stage.finishedAt);
 
       if (isFail) {
         stage.status = 'failed';
@@ -226,7 +307,10 @@ export class CicdHubService {
         run.durationMs = run.finishedAt - run.startedAt;
         pipeline.status = 'failed';
         pipeline.lastRunAt = run.finishedAt;
-        this.eventEmitter.emit('cicd.run.failed', { runId: run.id, pipelineName: pipeline.name });
+        this.eventEmitter.emit('cicd.run.failed', {
+          runId: run.id,
+          pipelineName: pipeline.name,
+        });
         return;
       }
 
@@ -238,23 +322,36 @@ export class CicdHubService {
     run.durationMs = run.finishedAt - run.startedAt;
     pipeline.status = 'success';
     pipeline.lastRunAt = run.finishedAt;
-    this.eventEmitter.emit('cicd.run.completed', { runId: run.id, pipelineName: pipeline.name });
+    this.eventEmitter.emit('cicd.run.completed', {
+      runId: run.id,
+      pipelineName: pipeline.name,
+    });
   }
 
   getStats(): CicdStats {
     const today = Date.now() - 86_400_000;
-    const finished = this.runs.filter((r) => r.status === 'success' || r.status === 'failed');
+    const finished = this.runs.filter(
+      (r) => r.status === 'success' || r.status === 'failed',
+    );
     const successCount = finished.filter((r) => r.status === 'success').length;
-    const durations = finished.filter((r) => r.durationMs).map((r) => r.durationMs!);
-    const avgDur = durations.length ? Math.round(durations.reduce((s, v) => s + v, 0) / durations.length) : 0;
+    const durations = finished
+      .filter((r) => r.durationMs)
+      .map((r) => r.durationMs!);
+    const avgDur = durations.length
+      ? Math.round(durations.reduce((s, v) => s + v, 0) / durations.length)
+      : 0;
 
     return {
       totalRuns: this.runs.length,
-      successRate: finished.length ? Math.round((successCount / finished.length) * 100) : 0,
+      successRate: finished.length
+        ? Math.round((successCount / finished.length) * 100)
+        : 0,
       avgDurationMs: avgDur,
       activeRuns: this.runs.filter((r) => r.status === 'running').length,
       totalPipelines: this.pipelines.length,
-      failedToday: this.runs.filter((r) => r.status === 'failed' && r.startedAt >= today).length,
+      failedToday: this.runs.filter(
+        (r) => r.status === 'failed' && r.startedAt >= today,
+      ).length,
     };
   }
 }

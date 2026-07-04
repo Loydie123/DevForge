@@ -35,6 +35,9 @@ importers:
       '@devforge/devops-hub':
         specifier: workspace:*
         version: link:../../modules/devops-hub
+      '@devforge/env-manager':
+        specifier: workspace:*
+        version: link:../../modules/env-manager
       '@devforge/error-tracker':
         specifier: workspace:*
         version: link:../../modules/error-tracker
@@ -348,6 +351,12 @@ importers:
         version: 5.9.3
 
   modules/devops-hub:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  modules/env-manager:
     devDependencies:
       typescript:
         specifier: ^5.0.0

@@ -81,7 +81,11 @@ export class SeoEngineService {
 
   generateSitemap(
     baseUrl: string,
-    pages: Array<{ path: string; priority?: number; changefreq?: SitemapEntry['changefreq'] }>,
+    pages: Array<{
+      path: string;
+      priority?: number;
+      changefreq?: SitemapEntry['changefreq'];
+    }>,
   ): { xml: string; entries: SitemapEntry[] } {
     const entries: SitemapEntry[] = pages.map((p) => ({
       loc: `${baseUrl.replace(/\/$/, '')}${p.path}`,
@@ -111,7 +115,8 @@ export class SeoEngineService {
         const lines: string[] = [`User-agent: ${c.userAgent}`];
         c.allow.forEach((a) => lines.push(`Allow: ${a}`));
         c.disallow.forEach((d) => lines.push(`Disallow: ${d}`));
-        if (c.crawlDelay !== undefined) lines.push(`Crawl-delay: ${c.crawlDelay}`);
+        if (c.crawlDelay !== undefined)
+          lines.push(`Crawl-delay: ${c.crawlDelay}`);
         if (c.sitemap) lines.push(`Sitemap: ${c.sitemap}`);
         return lines.join('\n');
       })
@@ -122,17 +127,34 @@ export class SeoEngineService {
     const blocks = text.split(/\n\s*\n/);
     return blocks
       .map((block) => {
-        const lines = block.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
-        const cfg: RobotsTxtConfig = { userAgent: '*', allow: [], disallow: [] };
+        const lines = block
+          .split('\n')
+          .map((l) => l.trim())
+          .filter((l) => l && !l.startsWith('#'));
+        const cfg: RobotsTxtConfig = {
+          userAgent: '*',
+          allow: [],
+          disallow: [],
+        };
         for (const line of lines) {
           const [key, ...rest] = line.split(':');
           const val = rest.join(':').trim();
           switch (key?.trim().toLowerCase()) {
-            case 'user-agent': cfg.userAgent = val; break;
-            case 'allow': cfg.allow.push(val); break;
-            case 'disallow': cfg.disallow.push(val); break;
-            case 'crawl-delay': cfg.crawlDelay = Number(val); break;
-            case 'sitemap': cfg.sitemap = val; break;
+            case 'user-agent':
+              cfg.userAgent = val;
+              break;
+            case 'allow':
+              cfg.allow.push(val);
+              break;
+            case 'disallow':
+              cfg.disallow.push(val);
+              break;
+            case 'crawl-delay':
+              cfg.crawlDelay = Number(val);
+              break;
+            case 'sitemap':
+              cfg.sitemap = val;
+              break;
           }
         }
         return cfg;
@@ -154,10 +176,15 @@ export class SeoEngineService {
     const clampedScore = Math.min(100, Math.max(0, score));
 
     const grade =
-      clampedScore >= 90 ? 'A' :
-      clampedScore >= 75 ? 'B' :
-      clampedScore >= 60 ? 'C' :
-      clampedScore >= 45 ? 'D' : 'F';
+      clampedScore >= 90
+        ? 'A'
+        : clampedScore >= 75
+          ? 'B'
+          : clampedScore >= 60
+            ? 'C'
+            : clampedScore >= 45
+              ? 'D'
+              : 'F';
 
     const breakdown = {
       meta: this.scoreCategory(issues, 'meta'),
@@ -234,7 +261,8 @@ export class SeoEngineService {
         type: 'error',
         category: 'technical',
         message: 'URL does not use HTTPS',
-        recommendation: 'Migrate to HTTPS. Google uses HTTPS as a ranking signal.',
+        recommendation:
+          'Migrate to HTTPS. Google uses HTTPS as a ranking signal.',
       });
     }
 
@@ -243,7 +271,8 @@ export class SeoEngineService {
         type: 'warning',
         category: 'technical',
         message: 'URL contains underscores — prefer hyphens',
-        recommendation: 'Replace underscores with hyphens in URL slugs for better crawlability.',
+        recommendation:
+          'Replace underscores with hyphens in URL slugs for better crawlability.',
       });
     }
 
@@ -253,14 +282,16 @@ export class SeoEngineService {
         type: 'error',
         category: 'meta',
         message: `Title tag is too short (${titleLen} chars)`,
-        recommendation: 'Aim for 50–60 characters. Include your primary keyword.',
+        recommendation:
+          'Aim for 50–60 characters. Include your primary keyword.',
       });
     } else if (titleLen > 60) {
       issues.push({
         type: 'warning',
         category: 'meta',
         message: `Title tag is too long (${titleLen} chars)`,
-        recommendation: 'Keep title under 60 characters to prevent truncation in SERPs.',
+        recommendation:
+          'Keep title under 60 characters to prevent truncation in SERPs.',
       });
     }
 
@@ -271,7 +302,8 @@ export class SeoEngineService {
         type: 'warning',
         category: 'meta',
         message: 'Meta description may be missing or too short',
-        recommendation: 'Write a unique meta description of 120–160 characters.',
+        recommendation:
+          'Write a unique meta description of 120–160 characters.',
       });
     }
     if (seed % 5 === 0) {
@@ -279,7 +311,8 @@ export class SeoEngineService {
         type: 'error',
         category: 'content',
         message: 'No H1 tag detected on the page',
-        recommendation: 'Every page should have exactly one H1 tag with your primary keyword.',
+        recommendation:
+          'Every page should have exactly one H1 tag with your primary keyword.',
       });
     }
     if (seed % 7 === 0) {
@@ -295,7 +328,8 @@ export class SeoEngineService {
         type: 'info',
         category: 'accessibility',
         message: 'Some images may lack alt attributes',
-        recommendation: 'Add descriptive alt text to all images for accessibility and SEO.',
+        recommendation:
+          'Add descriptive alt text to all images for accessibility and SEO.',
       });
     }
     if (seed % 4 === 0) {
@@ -303,7 +337,8 @@ export class SeoEngineService {
         type: 'info',
         category: 'technical',
         message: 'Structured data (JSON-LD) not detected',
-        recommendation: 'Add schema.org markup to improve rich snippets in search results.',
+        recommendation:
+          'Add schema.org markup to improve rich snippets in search results.',
       });
     }
     if (seed % 6 === 0) {
@@ -311,14 +346,18 @@ export class SeoEngineService {
         type: 'warning',
         category: 'content',
         message: 'Low keyword density detected',
-        recommendation: 'Ensure your target keyword appears naturally 2–3× per 100 words.',
+        recommendation:
+          'Ensure your target keyword appears naturally 2–3× per 100 words.',
       });
     }
 
     return issues;
   }
 
-  private scoreCategory(issues: SeoIssue[], category: SeoIssue['category']): number {
+  private scoreCategory(
+    issues: SeoIssue[],
+    category: SeoIssue['category'],
+  ): number {
     const relevant = issues.filter((i) => i.category === category);
     const errors = relevant.filter((i) => i.type === 'error').length;
     const warnings = relevant.filter((i) => i.type === 'warning').length;
@@ -330,7 +369,9 @@ export class SeoEngineService {
       const parsed = this.parseUrl(url);
       const slug = parsed.pathname.split('/').filter(Boolean).pop() ?? '';
       if (!slug) return parsed.hostname;
-      return slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      return slug
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
     } catch {
       return url;
     }

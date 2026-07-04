@@ -14,7 +14,11 @@ interface GenerateMetaDto {
 
 interface GenerateSitemapDto {
   baseUrl: string;
-  pages: Array<{ path: string; priority?: number; changefreq?: SitemapEntry['changefreq'] }>;
+  pages: Array<{
+    path: string;
+    priority?: number;
+    changefreq?: SitemapEntry['changefreq'];
+  }>;
 }
 
 interface GenerateRobotsDto {

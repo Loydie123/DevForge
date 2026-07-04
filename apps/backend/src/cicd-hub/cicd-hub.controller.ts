@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CicdHubService } from './cicd-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type { CreatePipelineDto, TriggerRunDto } from '@devforge/cicd-hub';
@@ -35,7 +43,11 @@ export class CicdHubController {
 
   @Post('runs/trigger')
   triggerRun(@Body() dto: TriggerRunDto) {
-    return this.cicd.triggerRun(dto.pipelineId, dto.branch, dto.trigger ?? 'manual');
+    return this.cicd.triggerRun(
+      dto.pipelineId,
+      dto.branch,
+      dto.trigger ?? 'manual',
+    );
   }
 
   // Webhook endpoint — no auth guard, uses pipeline ID as identifier

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { OpenGraphPreview } from "@/services/seo-engine/seo-engine-service";
 
 interface Props {
@@ -42,9 +43,9 @@ export default function OgPreviewPanel({ ogUrl, setOgUrl, onFetch, isLoading, pr
           <div className="flex flex-col gap-2">
             <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Facebook / LinkedIn</span>
             <div className="border border-gray-600 rounded-lg overflow-hidden bg-gray-900">
-              <div className="h-36 bg-gray-700 flex items-center justify-center">
+              <div className="relative h-36 bg-gray-700 flex items-center justify-center">
                 {preview.image ? (
-                  <img src={preview.image} alt="OG" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <Image src={preview.image} alt="OG" fill className="object-cover" unoptimized />
                 ) : (
                   <span className="text-gray-500 text-xs">No image</span>
                 )}
@@ -61,9 +62,9 @@ export default function OgPreviewPanel({ ogUrl, setOgUrl, onFetch, isLoading, pr
           <div className="flex flex-col gap-2">
             <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Twitter / X</span>
             <div className="border border-gray-600 rounded-xl overflow-hidden bg-gray-900">
-              <div className="h-36 bg-gray-700 flex items-center justify-center">
+              <div className="relative h-36 bg-gray-700 flex items-center justify-center">
                 {preview.image ? (
-                  <img src={preview.image} alt="Twitter OG" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <Image src={preview.image} alt="Twitter OG" fill className="object-cover" unoptimized />
                 ) : (
                   <span className="text-gray-500 text-xs">No image</span>
                 )}
@@ -87,8 +88,8 @@ export default function OgPreviewPanel({ ogUrl, setOgUrl, onFetch, isLoading, pr
                 <div className="text-xs text-blue-400 mt-1 truncate">{preview.url}</div>
               </div>
               {preview.image && (
-                <div className="w-16 h-16 rounded overflow-hidden shrink-0 bg-gray-700">
-                  <img src={preview.image} alt="thumb" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <div className="relative w-16 h-16 rounded overflow-hidden shrink-0 bg-gray-700">
+                  <Image src={preview.image} alt="thumb" fill className="object-cover" unoptimized />
                 </div>
               )}
             </div>
