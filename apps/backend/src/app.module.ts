@@ -22,6 +22,7 @@ import { PerformanceHubModule } from './performance-hub/performance-hub.module';
 import { CicdHubModule } from './cicd-hub/cicd-hub.module';
 import { SeoEngineModule } from './seo-engine/seo-engine.module';
 import { EnvManagerModule } from './env-manager/env-manager.module';
+import { PluginSystemModule } from './plugin-system/plugin-system.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { EnvManagerModule } from './env-manager/env-manager.module';
     CicdHubModule,
     SeoEngineModule,
     EnvManagerModule,
+    PluginSystemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

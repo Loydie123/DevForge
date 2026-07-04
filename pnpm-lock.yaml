@@ -56,6 +56,9 @@ importers:
       '@devforge/permissions':
         specifier: workspace:*
         version: link:../../core/permissions
+      '@devforge/plugin-engine':
+        specifier: workspace:*
+        version: link:../../core/plugin-engine
       '@devforge/project-generator':
         specifier: workspace:*
         version: link:../../modules/project-generator
@@ -315,6 +318,12 @@ importers:
         version: 5.9.3
 
   core/permissions:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  core/plugin-engine:
     devDependencies:
       typescript:
         specifier: ^5.0.0

@@ -28,6 +28,7 @@
     "@devforge/cicd-hub": "workspace:*",
     "@devforge/seo-engine": "workspace:*",
     "@devforge/env-manager": "workspace:*",
+    "@devforge/plugin-engine": "workspace:*",
     "@devforge/security-center": "workspace:*",
     "@devforge/api-hub": "workspace:*",
     "@devforge/auth": "workspace:*",
