@@ -19,6 +19,7 @@ import { SecurityCenterModule } from './security-center/security-center.module';
 import { SecurityMiddleware } from './security-center/security.middleware';
 import { AnalyticsHubModule } from './analytics-hub/analytics-hub.module';
 import { PerformanceHubModule } from './performance-hub/performance-hub.module';
+import { CicdHubModule } from './cicd-hub/cicd-hub.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PerformanceHubModule } from './performance-hub/performance-hub.module';
     SecurityCenterModule,
     AnalyticsHubModule,
     PerformanceHubModule,
+    CicdHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],
