@@ -10,6 +10,22 @@ import { EventBusService } from '../event-bus/event-bus.service';
 import { DevForgeEvents } from '@devforge/event-bus';
 import { ErrorLogDto } from '@devforge/logs-hub';
 import * as fs from 'fs';
+import * as path from 'path';
+
+// Allowed base directories for log file watching — prevents path traversal
+const ALLOWED_LOG_DIRS = ['/var/log', '/tmp/logs', process.cwd()];
+
+function assertSafePath(filePath: string): void {
+  const resolved = path.resolve(filePath);
+  const allowed = ALLOWED_LOG_DIRS.some((dir) =>
+    resolved.startsWith(path.resolve(dir)),
+  );
+  if (!allowed) {
+    throw new BadRequestException(
+      `File path "${filePath}" is outside allowed directories.`,
+    );
+  }
+}
 
 @Injectable()
 export class LogsHubService implements OnModuleInit, OnModuleDestroy {
@@ -125,6 +141,9 @@ export class LogsHubService implements OnModuleInit, OnModuleDestroy {
   }
 
   async addSource(projectId: string, name: string, filePath: string) {
+    // Block path traversal attacks — must resolve within allowed dirs
+    assertSafePath(filePath);
+
     if (!fs.existsSync(filePath)) {
       throw new BadRequestException(
         `File path "${filePath}" does not exist on host file system.`,

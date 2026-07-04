@@ -2,7 +2,19 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
+
+const DANGEROUS_SQL =
+  /^\s*(DROP|TRUNCATE|ALTER|CREATE\s+(OR\s+REPLACE\s+)?(?:TABLE|DATABASE|INDEX)|GRANT|REVOKE|SHUTDOWN|LOAD\s+DATA)\b/i;
+
+function assertSafeQuery(query: string): void {
+  if (DANGEROUS_SQL.test(query.trim())) {
+    throw new ForbiddenException(
+      'Destructive DDL statements (DROP, TRUNCATE, ALTER, GRANT, etc.) are blocked. Use a direct DB client for schema changes.',
+    );
+  }
+}
 import { Client as PgClient } from 'pg';
 import * as mysql from 'mysql2/promise';
 import { MongoClient } from 'mongodb';
@@ -141,6 +153,8 @@ export class DbHubService {
   // --- Query Execution ---
 
   async executeQuery(connectionId: string, queryText: string) {
+    assertSafeQuery(queryText);
+
     const conn = await this.prisma.dbConnection.findUnique({
       where: { id: connectionId },
     });

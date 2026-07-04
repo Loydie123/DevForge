@@ -271,7 +271,7 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [
     JwtModule.register({
-      secret: 'devforge_jwt_secret',
+      secret: process.env.JWT_SECRET || 'CHANGE_THIS_IN_PRODUCTION',
       signOptions: { expiresIn: '1h' },
     }),
   ],
@@ -305,7 +305,7 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   async login(user: string, pass: string) {
-    if (user === 'admin' && pass === 'password') {
+    if (user === 'YOUR_USERNAME' && pass === 'YOUR_PASSWORD') { // TODO: replace with real auth
       const payload = { username: user, role: 'admin' };
       return {
         accessToken: this.jwtService.sign(payload),
@@ -391,7 +391,7 @@ func setupAuthRoutes(app *fiber.App) {
 			return c.Status(400).SendString("Bad Request")
 		}
 
-		if req.Username == "admin" && req.Password == "password" {
+		if req.Username == "YOUR_USERNAME" && req.Password == "YOUR_PASSWORD" { // TODO: replace with real auth
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 				"username": req.Username,
 				"role":     "admin",
@@ -453,7 +453,7 @@ if __name__ == '__main__':
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-devforge-key'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'CHANGE_THIS_IN_PRODUCTION')
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 

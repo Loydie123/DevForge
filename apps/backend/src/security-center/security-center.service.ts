@@ -19,8 +19,7 @@ export class SecurityCenterService {
     { count: number; lastSeen: number; paths: string[] }
   >();
 
-  private readonly jwtSecret =
-    process.env.JWT_SECRET || 'devforge-super-secret-key-2026';
+  private readonly jwtSecret = process.env.JWT_SECRET ?? '';
 
   // Called by the middleware on every request
   recordRequest(event: Omit<AuditEvent, 'id'>) {
