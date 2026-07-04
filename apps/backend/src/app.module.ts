@@ -20,6 +20,7 @@ import { SecurityMiddleware } from './security-center/security.middleware';
 import { AnalyticsHubModule } from './analytics-hub/analytics-hub.module';
 import { PerformanceHubModule } from './performance-hub/performance-hub.module';
 import { CicdHubModule } from './cicd-hub/cicd-hub.module';
+import { SeoEngineModule } from './seo-engine/seo-engine.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CicdHubModule } from './cicd-hub/cicd-hub.module';
     AnalyticsHubModule,
     PerformanceHubModule,
     CicdHubModule,
+    SeoEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],
