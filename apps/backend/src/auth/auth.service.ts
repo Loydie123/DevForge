@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
@@ -15,12 +16,22 @@ import {
 
 @Injectable()
 export class AuthService {
-  private readonly jwtSecret =
-    process.env.JWT_SECRET || 'devforge-super-secret-key-2026';
+  private readonly jwtSecret: string;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET env variable is not set');
+    this.jwtSecret = secret;
+  }
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
+    if (!dto.email || !dto.password) {
+      throw new BadRequestException('Email and password are required.');
+    }
+    if (dto.password.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters.');
+    }
+
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -31,7 +42,7 @@ export class AuthService {
       );
     }
 
-    const passwordHash = await bcrypt.hash(dto.password || 'default123', 10);
+    const passwordHash = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
       data: {
@@ -68,7 +79,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
-    const matches = await bcrypt.compare(dto.password || '', user.password);
+    if (!dto.password) throw new BadRequestException('Password is required.');
+    const matches = await bcrypt.compare(dto.password, user.password);
 
     if (!matches) {
       throw new UnauthorizedException('Invalid credentials.');
