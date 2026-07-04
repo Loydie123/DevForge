@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { EnvManagerService } from './env-manager.service';
 
@@ -42,6 +43,8 @@ interface UpdateVariableDto {
 }
 
 @UseGuards(AuthGuard)
+@ApiTags('env-manager')
+@ApiBearerAuth()
 @Controller('env-manager')
 export class EnvManagerController {
   constructor(private readonly envService: EnvManagerService) {}

@@ -7,11 +7,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CicdHubService } from './cicd-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type { CreatePipelineDto, TriggerRunDto } from '@devforge/cicd-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('cicd-hub')
+@ApiBearerAuth()
 @Controller('cicd')
 export class CicdHubController {
   constructor(private readonly cicd: CicdHubService) {}

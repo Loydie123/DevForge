@@ -8,11 +8,14 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiHubService } from './api-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import * as ApiHub from '@devforge/api-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('api-hub')
+@ApiBearerAuth()
 @Controller('api-hub')
 export class ApiHubController {
   constructor(private readonly apiHubService: ApiHubService) {}

@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { SeoEngineService } from './seo-engine.service';
 import type { RobotsTxtConfig, SitemapEntry } from '@devforge/seo-engine';
@@ -31,6 +32,8 @@ interface ParseRobotsDto {
 }
 
 @UseGuards(AuthGuard)
+@ApiTags('seo-engine')
+@ApiBearerAuth()
 @Controller('seo-engine')
 export class SeoEngineController {
   constructor(private readonly seoService: SeoEngineService) {}

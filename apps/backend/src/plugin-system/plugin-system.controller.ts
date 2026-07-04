@@ -8,11 +8,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { PluginSystemService } from './plugin-system.service';
 import type { PluginHook } from '@devforge/plugin-engine';
 
 @UseGuards(AuthGuard)
+@ApiTags('plugin-system')
+@ApiBearerAuth()
 @Controller('plugin-system')
 export class PluginSystemController {
   constructor(private readonly pluginService: PluginSystemService) {}

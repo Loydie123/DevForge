@@ -9,11 +9,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LogsHubService } from './logs-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import * as LogsHub from '@devforge/logs-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('logs-hub')
+@ApiBearerAuth()
 @Controller('logs-hub')
 export class LogsHubController {
   constructor(private readonly logsHubService: LogsHubService) {}

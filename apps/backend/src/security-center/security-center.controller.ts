@@ -1,9 +1,12 @@
 import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SecurityCenterService } from './security-center.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type { JwtInspectDto } from '@devforge/security-center';
 
 @UseGuards(AuthGuard)
+@ApiTags('security')
+@ApiBearerAuth()
 @Controller('security')
 export class SecurityCenterController {
   constructor(private readonly security: SecurityCenterService) {}

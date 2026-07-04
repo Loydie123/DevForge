@@ -9,11 +9,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DbHubService } from './db-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import * as DbHub from '@devforge/db-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('db-hub')
+@ApiBearerAuth()
 @Controller('db-hub')
 export class DbHubController {
   constructor(private readonly dbHubService: DbHubService) {}

@@ -1,8 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PerformanceHubService } from './performance-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard)
+@ApiTags('performance-hub')
+@ApiBearerAuth()
 @Controller('performance')
 export class PerformanceHubController {
   constructor(private readonly performance: PerformanceHubService) {}

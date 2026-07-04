@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalyticsHubService } from './analytics-hub.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type {
@@ -7,6 +8,8 @@ import type {
 } from '@devforge/analytics-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('analytics-hub')
+@ApiBearerAuth()
 @Controller('analytics')
 export class AnalyticsHubController {
   constructor(private readonly analytics: AnalyticsHubService) {}

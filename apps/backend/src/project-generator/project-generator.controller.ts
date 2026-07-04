@@ -7,6 +7,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import * as express from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { ProjectGeneratorService } from './project-generator.service';
@@ -19,6 +20,8 @@ class GenerateProjectDto {
 }
 
 @UseGuards(AuthGuard)
+@ApiTags('project-generator')
+@ApiBearerAuth()
 @Controller('project-generator')
 export class ProjectGeneratorController {
   constructor(private readonly generatorService: ProjectGeneratorService) {}

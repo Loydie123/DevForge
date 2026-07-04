@@ -10,15 +10,27 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import * as Auth from '@devforge/auth';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Register a new user account' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'user@example.com',
+        password: 'password123',
+        name: 'John Doe',
+      },
+    },
+  })
   @Throttle({ short: { ttl: 60_000, limit: 5 } }) // 5 registrations/min per IP
   @Post('register')
   async register(
@@ -28,6 +40,10 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @ApiOperation({ summary: 'Login and receive a JWT token' })
+  @ApiBody({
+    schema: { example: { email: 'admin@devforge.com', password: 'admin123' } },
+  })
   @Throttle({ short: { ttl: 60_000, limit: 10 } }) // 10 login attempts/min per IP
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -39,6 +55,8 @@ export class AuthController {
     return this.authService.login(dto, ip);
   }
 
+  @ApiOperation({ summary: 'Logout and revoke the current JWT token' })
+  @ApiBearerAuth()
   @Post('logout')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -49,6 +67,8 @@ export class AuthController {
     if (token) await this.authService.logout(token);
   }
 
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard)
   getMe(@CurrentUser() user: Auth.JwtPayload) {

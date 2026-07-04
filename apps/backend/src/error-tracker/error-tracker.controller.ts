@@ -10,11 +10,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ErrorTrackerService } from './error-tracker.service';
 import { AuthGuard } from '../auth/auth.guard';
 import type { RecordErrorDto } from '@devforge/error-tracker';
 
 @UseGuards(AuthGuard)
+@ApiTags('error-tracker')
+@ApiBearerAuth()
 @Controller('error-tracker')
 export class ErrorTrackerController {
   constructor(private readonly errorTrackerService: ErrorTrackerService) {}

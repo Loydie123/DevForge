@@ -8,11 +8,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { DevOpsService } from './devops.service';
 import { AuthGuard } from '../auth/auth.guard';
 import * as DevOpsHub from '@devforge/devops-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('devops')
+@ApiBearerAuth()
 @Controller('devops')
 export class DevOpsController {
   constructor(private readonly devOpsService: DevOpsService) {}

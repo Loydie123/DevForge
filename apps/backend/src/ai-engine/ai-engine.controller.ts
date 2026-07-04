@@ -6,11 +6,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { AiEngineService } from './ai-engine.service';
 import * as AiEngine from '@devforge/ai-engine';
 
 @UseGuards(AuthGuard)
+@ApiTags('ai-engine')
+@ApiBearerAuth()
 @Controller('ai-engine')
 export class AiEngineController {
   constructor(private readonly aiEngineService: AiEngineService) {}

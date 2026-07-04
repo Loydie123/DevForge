@@ -7,11 +7,14 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { MonitoringService } from './monitoring.service';
 import { AuthGuard } from '../auth/auth.guard';
 import * as MonitoringHub from '@devforge/monitoring-hub';
 
 @UseGuards(AuthGuard)
+@ApiTags('monitoring')
+@ApiBearerAuth()
 @Controller('monitoring')
 export class MonitoringController {
   constructor(private readonly monitoringService: MonitoringService) {}
