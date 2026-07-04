@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,6 +15,8 @@ import { AdminModule } from './admin/admin.module';
 import { ProjectGeneratorModule } from './project-generator/project-generator.module';
 import { AiEngineModule } from './ai-engine/ai-engine.module';
 import { ErrorTrackerModule } from './error-tracker/error-tracker.module';
+import { SecurityCenterModule } from './security-center/security-center.module';
+import { SecurityMiddleware } from './security-center/security.middleware';
 
 @Module({
   imports: [
@@ -32,8 +34,13 @@ import { ErrorTrackerModule } from './error-tracker/error-tracker.module';
     ProjectGeneratorModule,
     AiEngineModule,
     ErrorTrackerModule,
+    SecurityCenterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityMiddleware).forRoutes('*');
+  }
+}

@@ -23,6 +23,7 @@
   "dependencies": {
     "@devforge/ai-engine": "workspace:*",
     "@devforge/error-tracker": "workspace:*",
+    "@devforge/security-center": "workspace:*",
     "@devforge/api-hub": "workspace:*",
     "@devforge/auth": "workspace:*",
     "@devforge/db-hub": "workspace:*",
