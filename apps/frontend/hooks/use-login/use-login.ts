@@ -17,7 +17,9 @@ export default function useLogin() {
     mutationFn: () => authService.login(email, password),
     onSuccess: (data) => {
       localStorage.setItem(TOKEN_KEY, data.token);
-      // Invalidate user-profile query cache to load fresh sessions
+      // Set a lightweight session cookie so proxy.ts can do optimistic redirects.
+      // This is NOT the JWT — just a presence flag. Real auth is enforced by the backend.
+      document.cookie = "devforge_session=1; path=/; SameSite=Strict; max-age=604800";
       void queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       router.push("/");
     },

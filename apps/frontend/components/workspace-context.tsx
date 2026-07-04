@@ -85,6 +85,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isAuthRoute && !isAuthLoading && !user) {
       localStorage.removeItem(TOKEN_KEY);
+      document.cookie = "devforge_session=; path=/; max-age=0";
       router.push("/login");
     }
   }, [user, isAuthLoading, isAuthRoute, router]);
@@ -96,6 +97,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(false);
     }
     localStorage.removeItem(TOKEN_KEY);
+    // Clear the session cookie so proxy.ts also sees the logout
+    document.cookie = "devforge_session=; path=/; max-age=0";
     router.push("/login");
   };
 
