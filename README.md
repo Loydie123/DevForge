@@ -1,61 +1,57 @@
-# 🚀 DevForge — Universal Developer Operating System (DevOS)
+# DevForge — Universal Developer Operating System (DevOS)
 
-DevForge is an all-in-one developer platform that unifies the entire software development lifecycle into a single workspace.
-
-It replaces fragmented tools like Postman, DBeaver, Swagger, Docker dashboards, Sentry, analytics tools, SEO tools, and CLI generators into one unified developer operating system.
+DevForge is an all-in-one developer platform that unifies the entire software development lifecycle into a single workspace. It replaces fragmented tools like Postman, DBeaver, Sentry, Grafana, and CLI generators into one unified developer operating system.
 
 ---
 
-# 🧠 Vision
+## Quick Start
 
-Modern development is fragmented across many tools:
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-org/devforge.git
+cd devforge
 
-- Postman → API Testing
-- DBeaver → Database Management
-- Swagger → API Documentation
-- Docker tools → DevOps
-- Sentry → Error Tracking
-- Grafana → Monitoring
-- Google Analytics → Analytics
-- SEO tools → Optimization
-- CLI tools → Project generation
+# 2. Copy env files
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env.local
 
-DevForge unifies all of them into one system.
+# 3. Start infrastructure (Postgres + Redis)
+docker compose -f infra/docker/docker-compose.yml up -d
+
+# 4. Install dependencies
+pnpm install
+
+# 5. Set up database
+cd apps/backend && npx prisma generate && npx prisma db seed && cd ../..
+
+# 6. Start development servers
+pnpm dev
+```
+
+> Frontend: http://localhost:3000 · Backend API: http://localhost:4000 · Health: http://localhost:4000/health
+
+**Default credentials:** `admin@devforge.com` / `admin123`
 
 ---
 
-# ⚙️ Core Philosophy
+## Full Docker Stack
 
-> “Build. Test. Deploy. Monitor. Optimize. Secure.”
+Run the entire stack (Postgres, Redis, Backend, Frontend, Nginx) in Docker:
 
-DevForge is not just a tool — it is a **Developer Operating System (DevOS)**.
+```bash
+docker compose -f infra/docker/docker-compose.full.yml up -d
+```
 
 ---
 
-# 🏗️ System Architecture
+## Architecture
 
-```txt id="arch_final"
-                    ┌──────────────────────┐
-                    │   DevForge UI        │
-                    │ Angular / React      │
-                    └─────────┬────────────┘
-                              │ REST / WebSocket
-                              ▼
-              ┌──────────────────────────────────┐
-              │      API Gateway (NestJS)       │
-              └──────────────┬───────────────────┘
-                             │
-     ┌──────────────┬────────┼───────────┬──────────────┐
-     ▼              ▼        ▼           ▼              ▼
- API HUB        DB HUB   MONITORING   LOGS HUB     AI ENGINE
-(Postman)      (DB Tool)  (Metrics)   (Logs)      (AI Assistant)
-
+```
 devforge/
 ├── apps/
-│   ├── frontend/
-│   ├── backend/
-│   └── desktop/
-├── modules/
+│   ├── frontend/          # Next.js 14 — React UI
+│   └── backend/           # NestJS — REST + WebSocket API
+├── modules/               # Domain feature packages
 │   ├── api-hub/
 │   ├── db-hub/
 │   ├── devops-hub/
@@ -67,270 +63,205 @@ devforge/
 │   ├── error-tracker/
 │   ├── performance-hub/
 │   ├── security-center/
+│   ├── env-manager/
+│   ├── cicd-hub/
 │   └── project-generator/
-├── core/
+├── core/                  # Shared packages
 │   ├── auth/
 │   ├── permissions/
 │   ├── event-bus/
 │   ├── plugin-engine/
 │   └── config/
 ├── infra/
-│   ├── docker/
-│   ├── nginx/
-│   └── ci-cd/
-└── README.md
+│   ├── docker/            # Compose files (dev + full)
+│   ├── nginx/             # Reverse proxy config
+│   └── ci-cd/             # GitHub Actions workflows
+└── .github/workflows/     # CI + CD pipelines
+```
 
-📦 Core Features
-📦 Project Generator
+---
 
-Multi-framework boilerplate generator.
+## Implemented Modules
 
-Supported:
+### API Hub — Postman Alternative
+- REST, GraphQL, WebSocket, and gRPC testing
+- Request collections, environment variables, history
+- JWT, OAuth2, and API Key authentication
 
-NestJS
-Express.js
-Fastify
-Laravel
-Django
-Spring Boot
-ASP.NET Core
-Go Fiber
-Next.js
-Angular
-devforge create nestjs ecommerce
+### DB Hub — Database Manager
+- MySQL, PostgreSQL, MongoDB, Redis, SQLite support
+- Query editor, table explorer, ERD generator
+- Schema visualization and data export
 
-Includes:
+### DevOps Hub
+- Docker container management
+- Compose file editor
+- Kubernetes config templates
+- VPS deployment tools
 
-Auth system
-RBAC
-Logging system
-Config system
-Clean architecture structure
-🔌 API Hub (Postman Alternative)
-REST API testing
-GraphQL support
-WebSocket testing
-gRPC support
-Request collections
-Environment variables
-Request history
-Authentication (JWT, OAuth2, API Keys)
-🗄️ DB Hub (DBeaver Alternative)
-MySQL, PostgreSQL, MongoDB, Redis, SQLite
-Query editor
-Table explorer
-ERD generator
-Schema visualization
-Data export tools
-🐳 DevOps Hub
-Docker integration
-Compose editor
-Kubernetes configs
-CI/CD templates
-VPS deployment tools
-📊 Monitoring Hub
-CPU / RAM / Disk usage
-API latency tracking
-Service uptime monitoring
-Request throughput
-Health checks dashboard
-🚨 Error Tracker
-Exception logging
-Stack traces
-Error grouping
-Severity classification
-Reproduction context logs
-🔥 Logs Hub
-Backend logs
-API logs
-System logs
-Docker logs
-Error logs
-📈 Analytics Hub
-Page views
-User behavior tracking
-Event tracking system
-Funnels
-API usage analytics
-Real-time users
-⚡ Performance Hub
-API response time tracking
-Slow query detection
-Memory profiling
-Bottleneck detection
-Route performance analysis
-🔍 SEO Engine
-Meta tag generator
-Open Graph preview
-Sitemap generator
-Robots.txt manager
-SEO audit tool
-Page scoring system
-devforge seo analyze https://yourapp.com
-🤖 AI Engine
-Generate CRUD APIs
-Generate SQL schemas
-Explain errors
-Refactor code
-Generate tests
-Architecture suggestions
+### Monitoring Hub
+- CPU / RAM / Disk usage tracking
+- API latency and request throughput
+- Service uptime and health check dashboard
 
-Supported:
+### Error Tracker — Sentry Alternative
+- Exception logging with full stack traces
+- Error grouping, severity classification
+- Reproduction context and filtering
 
-OpenAI
-OpenRouter
-Claude
-Gemini
-🔐 Security Center
-JWT inspection
-Rate limiting monitoring
-API abuse detection
-Vulnerability scanning
-Suspicious IP detection
-Audit logs
-⚙️ Environment Manager
-Dev / Staging / Production configs
-Secrets management
-API keys vault
-Config versioning
-🔌 Plugin System
+### Logs Hub
+- Backend, API, system, and Docker logs
+- Real-time streaming via WebSocket
+- Search, filter, and export
 
-Fully extensible architecture.
+### Analytics Hub — GA Alternative
+- Page views, unique visitors, sessions
+- User behavior and event tracking
+- Funnels, API usage analytics, real-time users
 
-plugin-example/
-├── manifest.json
-├── index.ts
-└── hooks.ts
-Hooks:
-onRequest
-onResponse
-onError
-onLog
-onMetric
-⚡ Event System (Core Engine)
+### Performance Hub
+- API response time tracking
+- Slow query detection and analysis
+- Route-by-route performance breakdown
+- Memory and bottleneck detection
 
-Everything runs on event-driven architecture:
+### Security Center
+- JWT inspection and validation
+- Rate limiting monitoring and API abuse detection
+- Suspicious IP detection
+- Audit logs and vulnerability scanning
 
-API_REQUEST
-API_RESPONSE
-DB_QUERY
-ERROR_THROWN
-LOG_CREATED
-METRIC_UPDATED
-PLUGIN_TRIGGERED
-🧪 System Flow
-User Request
-   ↓
-API Hub
-   ↓
-Event Bus
-   ↓
-Logs + Monitoring + Analytics
-   ↓
-Response
-💻 CLI TOOL
-devforge create nestjs ecommerce
-devforge run
-devforge analyze
-devforge plugin install monitoring
-devforge seo analyze https://app.com
-🗄️ Database Schema
-Users
-id
-email
-password
-role
-created_at
-Projects
-id
-name
-framework
-type
-created_at
-Logs
-id
-type
-message
-metadata
-created_at
-Metrics
-id
-service
-latency
-cpu
-memory
-timestamp
-Errors
-id
-service
-message
-stack_trace
-severity
-Plugins
-id
-name
-version
-config
-enabled
-🚀 Roadmap
-Phase 1 — MVP
-API Hub
-DB Hub
-Logs System
-Auth System
-Project Generator
-Phase 2 — Core Power
-Monitoring Hub
-Error Tracking
-AI Engine
-Phase 3 — Optimization Layer
-SEO Engine
-Analytics Hub
-Performance Hub
-Security Center
-Phase 4 — Ecosystem
-Plugin Marketplace
-Desktop App (Electron/Tauri)
-Multi-user collaboration
-Cloud sync
-🤝 Contributing (Open Source)
+### SEO Engine
+- Meta tag generator and validator
+- Open Graph preview
+- Sitemap generator
+- Robots.txt manager
+- Full SEO audit with page scoring
 
-We welcome contributions from the community!
+### Environment Manager
+- Dev / Staging / Production config management
+- Secrets management and API keys vault
+- Config versioning with diff support
 
-How to Contribute:
-Fork the repository
+### CI/CD Hub
+- Pipeline management (GitHub Actions, GitLab CI)
+- Build runs, logs, and deploy tracking
+- Deployment history and status
 
-Create your feature branch
+### Project Generator
+- Multi-framework boilerplate scaffolding
+- Supported: NestJS, Express, Fastify, Next.js, Angular, Laravel, Django, Spring Boot, ASP.NET Core, Go Fiber
+- Generates auth, RBAC, logging, config, and clean architecture
 
-git checkout -b feature/your-feature
+### AI Engine
+- Generate CRUD APIs, SQL schemas, and tests
+- Explain errors and suggest fixes
+- Refactor and architecture suggestions
+- Supported providers: OpenAI, OpenRouter, Claude, Gemini
 
-Commit your changes
+### Plugin System
+- Extensible hook-based plugin architecture
+- Plugin marketplace with install/uninstall
+- Hooks: `onRequest`, `onResponse`, `onError`, `onLog`, `onMetric`
 
-git commit -m "Add your feature"
+---
 
-Push to branch
+## UI Features
 
-git push origin feature/your-feature
-Open a Pull Request
+- **Command Palette** — `Ctrl+K` / `Cmd+K` to navigate anywhere instantly
+- **Notifications Center** — Real-time bell with error, warning, and pipeline alerts
+- **User Settings** — Profile management, password change, preferences
+- **Skeleton Loaders** — Per-hub loading states for smooth UX
+- **Custom 404 / Error pages** — Branded not-found and crash recovery pages
+- **Per-page metadata** — Proper `<title>` and Open Graph for all pages
+- **Dynamic favicon** — Served via Next.js `ImageResponse`
+
+---
+
+## Event-Driven Architecture
+
+All modules communicate through a shared event bus:
+
+```
+API_REQUEST → API_RESPONSE → Logs + Monitoring + Analytics
+ERROR_THROWN → Error Tracker → Notifications
+DB_QUERY → Performance Hub
+METRIC_UPDATED → Monitoring Hub
+PLUGIN_TRIGGERED → Plugin System
+```
+
+---
+
+## Infrastructure
+
+| Component | Technology |
+|-----------|-----------|
+| Frontend | Next.js 14, React, Tailwind CSS, TanStack Query |
+| Backend | NestJS, Prisma ORM, Socket.io |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Reverse Proxy | Nginx (rate limiting, SSL, WebSocket) |
+| CI/CD | GitHub Actions (lint → build → deploy) |
+| Containerization | Docker + Docker Compose |
+| Monorepo | pnpm + Turborepo |
+
+---
+
+## CI/CD Pipelines
+
+**CI** (`.github/workflows/ci.yml`) — runs on every push/PR:
+- Lint, type-check, build all packages
+
+**Deploy** (`.github/workflows/deploy.yml`) — runs on `main`/`production` branch:
+- Docker build + push to GitHub Container Registry (GHCR)
+- SSH deploy to staging / production server
+
+See `infra/ci-cd/README.md` for required GitHub secrets.
+
+---
+
+## Database Schema
+
+| Table | Key Fields |
+|-------|-----------|
+| `users` | id, email, password, role, created_at |
+| `projects` | id, name, framework, type, created_at |
+| `logs` | id, type, message, metadata, created_at |
+| `metrics` | id, service, latency, cpu, memory, timestamp |
+| `errors` | id, service, message, stack_trace, severity |
+| `plugins` | id, name, version, config, enabled |
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Follow the modular architecture — new features go in `modules/` or `core/`
+4. Ensure types are shared via module packages
+5. Open a Pull Request
+
 Guidelines:
-Follow modular architecture
-Keep code clean and maintainable
-Avoid tight coupling between modules
-Ensure features are plugin-compatible
-Types of Contributions:
-New modules (API tools, DevOps tools, etc.)
-UI improvements
-Performance optimizations
-Bug fixes
-Documentation improvements
-Plugin development
-📜 License
+- Avoid tight coupling between modules — use the event bus
+- Keep shared types in the module's package (`modules/<name>/src/index.ts`)
+- Frontend components go in `apps/frontend/app/<hub>/_components/`
+
+---
+
+## Roadmap
+
+- [x] Phase 1 — API Hub, DB Hub, Logs, Auth, Project Generator
+- [x] Phase 2 — Monitoring Hub, Error Tracker, AI Engine
+- [x] Phase 3 — SEO Engine, Analytics Hub, Performance Hub, Security Center
+- [x] Phase 4 — Environment Manager, CI/CD Hub, Plugin System
+- [ ] Phase 5 — Desktop App (Electron/Tauri), Multi-user collaboration, Cloud sync
+
+---
+
+## License
 
 MIT License
 
-⭐ Status
+---
 
-🚧 Active Open Source Development
-🔥 Production-level system design
-🧠 Built for real-world developers
-🌍 Community-driven project
+> **Status:** Active development · Production-level architecture · Built for real-world developers
