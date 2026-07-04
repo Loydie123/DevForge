@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@devforge/ai-engine": "workspace:*",
     "@devforge/api-hub": "workspace:*",
     "@devforge/auth": "workspace:*",
     "@devforge/db-hub": "workspace:*",
@@ -30,9 +31,9 @@
     "@devforge/monitoring-hub": "workspace:*",
     "@devforge/permissions": "workspace:*",
     "@devforge/project-generator": "workspace:*",
-    "@devforge/ai-engine": "workspace:*",
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/event-emitter": "^2.1.1",
     "@nestjs/platform-express": "^11.0.1",
