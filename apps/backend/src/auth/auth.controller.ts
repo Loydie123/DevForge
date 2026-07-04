@@ -39,6 +39,16 @@ export class AuthController {
     return this.authService.login(dto, ip);
   }
 
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req: Request) {
+    const token = (req.headers as Record<string, string>)[
+      'authorization'
+    ]?.split(' ')[1];
+    if (token) await this.authService.logout(token);
+  }
+
   @Get('me')
   @UseGuards(AuthGuard)
   getMe(@CurrentUser() user: Auth.JwtPayload) {

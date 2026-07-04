@@ -96,8 +96,15 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       setSocket(null);
       setIsConnected(false);
     }
+    const token = localStorage.getItem(TOKEN_KEY);
+    // Revoke token server-side (blacklist the JTI in Redis) — fire and forget
+    if (token) {
+      void fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
     localStorage.removeItem(TOKEN_KEY);
-    // Clear the session cookie so proxy.ts also sees the logout
     document.cookie = "devforge_session=; path=/; max-age=0";
     router.push("/login");
   };

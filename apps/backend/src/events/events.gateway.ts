@@ -20,7 +20,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private readonly authService: AuthService) {}
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     const auth = client.handshake.auth as Record<string, unknown> | undefined;
     const token = typeof auth?.token === 'string' ? auth.token : undefined;
 
@@ -33,7 +33,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      this.authService.validateToken(token);
+      await this.authService.validateToken(token);
       console.log(`[WebSocket] Client authenticated & connected: ${client.id}`);
     } catch (err: unknown) {
       const errMsg =

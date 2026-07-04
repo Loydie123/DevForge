@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { JwtPayload } from '@devforge/auth';
 
 interface CustomRequest extends Request {
@@ -16,7 +16,7 @@ interface CustomRequest extends Request {
 export class AuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<CustomRequest>();
     const authHeader = request.headers.authorization;
 
@@ -25,7 +25,6 @@ export class AuthGuard implements CanActivate {
     }
 
     const parts = authHeader.split(' ');
-
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
       throw new UnauthorizedException(
         'Invalid authorization header format. Use "Bearer <token>".',
@@ -33,7 +32,8 @@ export class AuthGuard implements CanActivate {
     }
 
     const token = parts[1];
-    const payload = this.authService.validateToken(token);
+    // validateToken now checks blacklist — revoked tokens are rejected here
+    const payload = await this.authService.validateToken(token);
     request.user = payload;
     return true;
   }
