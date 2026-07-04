@@ -17,6 +17,9 @@ importers:
       '@devforge/ai-engine':
         specifier: workspace:*
         version: link:../../modules/ai-engine
+      '@devforge/analytics-hub':
+        specifier: workspace:*
+        version: link:../../modules/analytics-hub
       '@devforge/api-hub':
         specifier: workspace:*
         version: link:../../modules/api-hub
@@ -300,6 +303,12 @@ importers:
         version: 5.9.3
 
   modules/ai-engine:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  modules/analytics-hub:
     devDependencies:
       typescript:
         specifier: ^5.0.0

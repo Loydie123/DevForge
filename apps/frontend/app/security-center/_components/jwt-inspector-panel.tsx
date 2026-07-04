@@ -1,6 +1,6 @@
 "use client";
 
-import { JwtInspectResult } from "../../../services/security-center/security-center-service";
+import type { JwtInspectResult } from "../../../services/security-center/security-center-service";
 
 interface Props {
   jwtInput: string;

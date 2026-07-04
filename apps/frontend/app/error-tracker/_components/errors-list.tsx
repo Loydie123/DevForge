@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorLog } from "../../../services/error-tracker/error-tracker-service";
+import type { ErrorLog } from "../../../services/error-tracker/error-tracker-service";
 
 interface Props {
   errors: ErrorLog[];

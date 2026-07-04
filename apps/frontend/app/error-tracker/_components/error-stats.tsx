@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorStats } from "../../../services/error-tracker/error-tracker-service";
+import type { ErrorStats } from "../../../services/error-tracker/error-tracker-service";
 
 interface Props {
   stats: ErrorStats | undefined;

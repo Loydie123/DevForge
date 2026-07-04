@@ -153,7 +153,8 @@ export class SecurityCenterService {
         const exp = payload?.['exp'] as number | undefined;
         return {
           valid: false,
-          header: (decoded?.header as unknown as Record<string, unknown>) ?? null,
+          header:
+            (decoded?.header as unknown as Record<string, unknown>) ?? null,
           payload,
           expiresAt: exp ? new Date(exp * 1000).toISOString() : null,
           isExpired: isExpiredErr,

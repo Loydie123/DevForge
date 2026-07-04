@@ -1,6 +1,6 @@
 "use client";
 
-import { SecurityStats } from "../../../services/security-center/security-center-service";
+import type { SecurityStats } from "../../../services/security-center/security-center-service";
 
 interface Props {
   stats: SecurityStats | undefined;

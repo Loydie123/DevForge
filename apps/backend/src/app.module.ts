@@ -17,6 +17,7 @@ import { AiEngineModule } from './ai-engine/ai-engine.module';
 import { ErrorTrackerModule } from './error-tracker/error-tracker.module';
 import { SecurityCenterModule } from './security-center/security-center.module';
 import { SecurityMiddleware } from './security-center/security.middleware';
+import { AnalyticsHubModule } from './analytics-hub/analytics-hub.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { SecurityMiddleware } from './security-center/security.middleware';
     AiEngineModule,
     ErrorTrackerModule,
     SecurityCenterModule,
+    AnalyticsHubModule,
   ],
   controllers: [AppController],
   providers: [AppService],

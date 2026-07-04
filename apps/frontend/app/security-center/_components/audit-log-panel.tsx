@@ -1,6 +1,6 @@
 "use client";
 
-import { AuditEvent } from "../../../services/security-center/security-center-service";
+import type { AuditEvent } from "../../../services/security-center/security-center-service";
 
 interface Props {
   events: AuditEvent[];

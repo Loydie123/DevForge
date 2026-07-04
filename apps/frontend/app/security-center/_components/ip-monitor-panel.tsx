@@ -1,6 +1,6 @@
 "use client";
 
-import { IpStat } from "../../../services/security-center/security-center-service";
+import type { IpStat } from "../../../services/security-center/security-center-service";
 
 interface Props {
   ipStats: IpStat[];
