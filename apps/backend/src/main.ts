@@ -8,7 +8,10 @@ import { EventBusService } from './event-bus/event-bus.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
 
+console.log('[Bootstrap] Starting backend bootstrap process...');
+
 async function bootstrap() {
+  console.log('[Bootstrap] NestJS bootstrap function initiated...');
   const app = await NestFactory.create(AppModule);
 
   // ── Security headers ────────────────────────────────────────────────────────
@@ -83,7 +86,9 @@ async function bootstrap() {
     customSiteTitle: 'DevForge API Docs',
   });
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`[Bootstrap] Backend is successfully listening on port ${port} (0.0.0.0)`);
 }
 
 void bootstrap();

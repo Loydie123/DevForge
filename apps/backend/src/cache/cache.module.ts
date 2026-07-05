@@ -14,9 +14,19 @@ import { redisStore } from 'cache-manager-redis-yet';
         if (redisUrl ?? redisHost) {
           try {
             // URL-based takes priority (supports rediss:// TLS — required for Upstash)
+            const socketConfig = {
+              connectTimeout: 5000,
+              reconnectStrategy: (retries: number) => {
+                if (retries > 2) {
+                  return new Error('[Cache] Redis connection failed after 2 retries.');
+                }
+                return 1000;
+              },
+            };
+
             const storeOptions = redisUrl
-              ? { url: redisUrl }
-              : { socket: { host: redisHost, port: Number(redisPort) } };
+              ? { url: redisUrl, socket: socketConfig }
+              : { socket: { host: redisHost, port: Number(redisPort), ...socketConfig } };
 
             console.log(
               redisUrl
@@ -24,7 +34,7 @@ import { redisStore } from 'cache-manager-redis-yet';
                 : `[Cache] Connecting to Redis at ${redisHost}:${redisPort}`,
             );
 
-            const store = await redisStore(storeOptions);
+            const store = await redisStore(storeOptions as any);
             return { store };
           } catch (error) {
             console.warn(
