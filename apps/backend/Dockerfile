@@ -58,11 +58,14 @@ COPY modules/monitoring-hub/package.json ./modules/monitoring-hub/
 COPY modules/project-generator/package.json ./modules/project-generator/
 COPY apps/backend/package.json       ./apps/backend/
 
-RUN pnpm install --frozen-lockfile --prod
+# Skip postinstall scripts — avoids @prisma/client trying to run `npx prisma generate`
+# which would download the wrong (latest) Prisma version
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
-# Copy Prisma schema + generated client
-COPY --from=builder /app/apps/backend/prisma ./apps/backend/prisma
-COPY --from=builder /app/node_modules/.pnpm  ./node_modules/.pnpm
+# Copy Prisma schema, generated client, and full pnpm store from builder
+COPY --from=builder /app/apps/backend/prisma  ./apps/backend/prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/.pnpm   ./node_modules/.pnpm
 
 # Copy built shared packages and backend dist
 COPY --from=builder /app/core/    ./core/
