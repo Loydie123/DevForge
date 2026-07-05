@@ -46,6 +46,7 @@ async function bootstrap() {
       if (!origin || cleanOrigin === cleanAllowed || cleanOrigin === 'http://localhost:3000') {
         callback(null, true);
       } else {
+        console.warn(`[CORS Blocked] Origin: "${origin}" | Cleaned: "${cleanOrigin}" does not match Allowed: "${allowedUrl}" | Cleaned: "${cleanAllowed}"`);
         callback(new Error(`Origin ${origin} not allowed by CORS`));
       }
     },
