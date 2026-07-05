@@ -20,9 +20,9 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-eval needed by Next.js dev
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
-      "font-src 'self'",
+      "font-src 'self' https://fonts.gstatic.com",
       `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"} ws: wss:`,
       "frame-ancestors 'none'",
     ].join("; "),
