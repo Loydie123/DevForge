@@ -7,6 +7,7 @@ import { EventBusLogger } from './event-bus/event-bus-logger';
 import { EventBusService } from './event-bus/event-bus.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
+import { PrismaClient } from '@prisma/client';
 
 import { execSync } from 'child_process';
 
@@ -20,8 +21,18 @@ async function bootstrap() {
     console.log('[Bootstrap] Running database migrations...');
     execSync('npx prisma migrate deploy --schema=prisma/schema.prisma', { stdio: 'inherit' });
     console.log('[Bootstrap] Database migrations completed successfully.');
+
+    // Check if database needs seeding
+    const prisma = new PrismaClient();
+    const userCount = await prisma.user.count();
+    if (userCount === 0) {
+      console.log('[Bootstrap] Database is empty. Running database seed...');
+      execSync('npx prisma db seed', { stdio: 'inherit' });
+      console.log('[Bootstrap] Database seeding completed successfully.');
+    }
+    await prisma.$disconnect();
   } catch (error) {
-    console.error('[Bootstrap] Database migrations failed:', error);
+    console.error('[Bootstrap] Database setup failed:', error);
     process.exit(1);
   }
 
