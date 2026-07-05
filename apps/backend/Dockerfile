@@ -4,6 +4,7 @@
 FROM node:22-alpine
 WORKDIR /app
 
+RUN apk add --no-cache openssl
 RUN npm install -g pnpm
 
 # Copy workspace manifests for layer caching
