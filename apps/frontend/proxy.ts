@@ -26,6 +26,9 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
+    pathname.startsWith("/opengraph-image") ||
+    pathname.startsWith("/apple-icon") ||
+    pathname.startsWith("/icon") ||
     pathname.match(/\.(ico|png|svg|jpg|jpeg|webp|woff|woff2)$/)
   ) {
     return NextResponse.next();
