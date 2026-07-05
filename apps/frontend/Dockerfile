@@ -1,20 +1,32 @@
+# Build context must be the monorepo ROOT:
+#   docker build -f apps/frontend/Dockerfile .
+# Or via docker-compose.full.yml which sets context to ../../ (repo root)
+
 # ─── Dependencies Stage ───────────────────────────────────────────────────────
 FROM node:20-alpine AS deps
 WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/frontend/package.json ./apps/frontend/
+
 RUN pnpm install --frozen-lockfile
 
 # ─── Build Stage ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+RUN npm install -g pnpm
 
-RUN npm install -g pnpm && pnpm build
+COPY --from=deps /app/node_modules        ./node_modules
+COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/frontend/ ./apps/frontend/
+
+WORKDIR /app/apps/frontend
+RUN DOCKER_BUILD=1 pnpm build
 
 # ─── Production Stage ─────────────────────────────────────────────────────────
 FROM node:20-alpine AS production
@@ -22,9 +34,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# next.config.ts output: 'standalone' bundles everything needed
+COPY --from=builder /app/apps/frontend/.next/standalone ./
+COPY --from=builder /app/apps/frontend/.next/static     ./.next/static
+COPY --from=builder /app/apps/frontend/public           ./public
 
 EXPOSE 3000
 

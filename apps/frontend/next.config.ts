@@ -30,6 +30,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // "standalone" is only for Docker/self-hosted — Vercel uses its own output format
+  output: process.env.DOCKER_BUILD ? "standalone" : undefined,
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
