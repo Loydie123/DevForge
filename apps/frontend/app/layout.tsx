@@ -6,6 +6,7 @@ import Providers from "../providers";
 import { WorkspaceProvider } from "../components/workspace-context";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
     default: "DevForge",
     template: "%s — DevForge",
@@ -17,6 +18,13 @@ export const metadata: Metadata = {
     title: "DevForge",
     description: "Universal Developer Operating System (DevOS)",
     type: "website",
+    siteName: "DevForge",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DevForge",
+    description: "Universal Developer Operating System — API Hub, DB Hub, Monitoring, Logs, Analytics, Security, CI/CD and more.",
   },
 };
 
