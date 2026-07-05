@@ -1,6 +1,7 @@
 import {
   WebSocketGateway,
   WebSocketServer,
+  OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
@@ -14,35 +15,41 @@ import { AuthService } from '../auth/auth.service';
     origin: '*', // In production, restrict this to FRONTEND_URL
   },
 })
-export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class EventsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
   constructor(private readonly authService: AuthService) {}
 
-  async handleConnection(client: Socket) {
-    const auth = client.handshake.auth as Record<string, unknown> | undefined;
-    const token = typeof auth?.token === 'string' ? auth.token : undefined;
+  // Runs once after the server is initialized — reject unauthenticated
+  // connections at the handshake level (before the client sees "connect").
+  afterInit(server: Server) {
+    server.use((socket, next) => {
+      const auth = socket.handshake.auth as Record<string, unknown> | undefined;
+      const token = typeof auth?.token === 'string' ? auth.token : undefined;
 
-    if (!token) {
-      console.log(
-        `[WebSocket] Connection rejected: No token provided (Client: ${client.id})`,
-      );
-      client.disconnect(true);
-      return;
-    }
+      if (!token) {
+        next(new Error('Authentication error: No token provided'));
+        return;
+      }
 
-    try {
-      await this.authService.validateToken(token);
-      console.log(`[WebSocket] Client authenticated & connected: ${client.id}`);
-    } catch (err: unknown) {
-      const errMsg =
-        err instanceof Error ? err.message : 'Unknown validation error';
-      console.log(
-        `[WebSocket] Connection rejected: Invalid token. Error: ${errMsg} (Client: ${client.id})`,
-      );
-      client.disconnect(true);
-    }
+      this.authService
+        .validateToken(token)
+        .then((payload) => {
+          socket.data.user = payload;
+          next();
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : 'Invalid token';
+          next(new Error(`Authentication error: ${msg}`));
+        });
+    });
+  }
+
+  handleConnection(client: Socket) {
+    console.log(`[WebSocket] Client authenticated & connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
