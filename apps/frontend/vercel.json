@@ -1,5 +1,6 @@
 {
   "buildCommand": "cd ../.. && pnpm --filter \"@devforge/*\" build && pnpm --filter devforge-frontend build",
+  "framework": "nextjs",
   "rewrites": [
     {
       "source": "/api/:path*",
