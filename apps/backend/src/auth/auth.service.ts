@@ -18,6 +18,14 @@ import {
   AuthResponse,
 } from '@devforge/auth';
 
+interface GitHubUser {
+  id: number;
+  login: string;
+  name: string | null;
+  email: string | null;
+  avatar_url: string;
+}
+
 const MAX_FAILED = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 const TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 days (matches JWT expiresIn)
@@ -141,6 +149,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    if (!user.password) {
+      // OAuth-only account — no password set
+      this.recordFailure(ip);
+      throw new UnauthorizedException(
+        'This account uses GitHub sign-in. Please click "Continue with GitHub" to log in.',
+      );
+    }
+
     const matches = await bcrypt.compare(dto.password, user.password);
     if (!matches) {
       this.recordFailure(ip);
@@ -148,6 +164,131 @@ export class AuthService {
     }
 
     this.clearFailures(ip);
+    const token = this.generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    };
+  }
+
+  // ── GitHub OAuth ───────────────────────────────────────────────────────────
+
+  getGitHubAuthUrl(): string {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    if (!clientId) throw new Error('GITHUB_CLIENT_ID is not set');
+    const callbackUrl =
+      process.env.GITHUB_CALLBACK_URL ??
+      'http://localhost:4000/api/auth/github/callback';
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: callbackUrl,
+      scope: 'user:email',
+    });
+    return `https://github.com/login/oauth/authorize?${params.toString()}`;
+  }
+
+  async loginWithGitHub(code: string): Promise<AuthResponse> {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    if (!clientId || !clientSecret) {
+      throw new Error('GitHub OAuth credentials are not configured');
+    }
+
+    // 1. Exchange code for access token
+    const tokenRes = await fetch(
+      'https://github.com/login/oauth/access_token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+        }),
+      },
+    );
+    const tokenData = (await tokenRes.json()) as Record<string, string>;
+    const accessToken = tokenData['access_token'];
+    if (!accessToken) {
+      throw new UnauthorizedException(
+        'GitHub OAuth failed: could not get access token',
+      );
+    }
+
+    // 2. Get user info from GitHub
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    });
+    const ghUser = (await userRes.json()) as GitHubUser;
+
+    // 3. Get primary verified email if not public
+    let email = ghUser.email;
+    if (!email) {
+      const emailsRes = await fetch('https://api.github.com/user/emails', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+      });
+      const emails = (await emailsRes.json()) as Array<{
+        email: string;
+        primary: boolean;
+        verified: boolean;
+      }>;
+      email = emails.find((e) => e.primary && e.verified)?.email ?? null;
+    }
+    if (!email) {
+      throw new BadRequestException(
+        'Your GitHub account has no verified email. Please add a public email in GitHub settings.',
+      );
+    }
+
+    // 4. Find or create user
+    const githubId = String(ghUser.id);
+    let user = await this.prisma.user.findFirst({
+      where: { OR: [{ githubId }, { email }] },
+    });
+
+    if (user) {
+      // Link GitHub if not already linked
+      if (!user.githubId) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            githubId,
+            avatarUrl: ghUser.avatar_url,
+            name: user.name ?? ghUser.name,
+          },
+        });
+      }
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          name: ghUser.name ?? ghUser.login,
+          avatarUrl: ghUser.avatar_url,
+          githubId,
+          role: 'developer',
+        },
+      });
+    }
+
     const token = this.generateToken({
       userId: user.id,
       email: user.email,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Public routes that don't require auth
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/login", "/register", "/auth/github"];
 
 // Routes that authenticated users should be redirected away from
 const AUTH_ROUTES = ["/login", "/register"];

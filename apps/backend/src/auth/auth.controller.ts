@@ -4,13 +4,21 @@ import {
   Get,
   Body,
   Req,
+  Res,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiBody } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiBody,
+  ApiExcludeEndpoint,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from './current-user.decorator';
@@ -73,5 +81,32 @@ export class AuthController {
   @UseGuards(AuthGuard)
   getMe(@CurrentUser() user: Auth.JwtPayload) {
     return user;
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('github')
+  githubLogin(@Res() res: Response) {
+    const url = this.authService.getGitHubAuthUrl();
+    res.redirect(url);
+  }
+
+  @ApiExcludeEndpoint()
+  @Get('github/callback')
+  async githubCallback(@Query('code') code: string, @Res() res: Response) {
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+
+    if (!code) {
+      return res.redirect(`${frontendUrl}/login?error=github_denied`);
+    }
+
+    try {
+      const { token } = await this.authService.loginWithGitHub(code);
+      return res.redirect(`${frontendUrl}/auth/github/callback?token=${token}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'oauth_failed';
+      return res.redirect(
+        `${frontendUrl}/login?error=${encodeURIComponent(msg)}`,
+      );
+    }
   }
 }

@@ -116,8 +116,10 @@ model LogSource {
 model User {
   id        String    @id @default(uuid())
   email     String    @unique
-  password  String
+  password  String?   // nullable for OAuth-only users
   name      String?
+  avatarUrl String?
+  githubId  String?   @unique
   role      String    @default("developer") // "admin" | "developer"
   projects  Project[]
   createdAt DateTime  @default(now())

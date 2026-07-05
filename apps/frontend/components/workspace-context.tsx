@@ -28,7 +28,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  const isAuthRoute = pathname === "/login" || pathname === "/register";
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/auth/"); // OAuth callback routes (/auth/github/callback, etc.)
 
   // Auth check query
   const {
