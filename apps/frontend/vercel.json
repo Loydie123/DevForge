@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd ../.. && pnpm --filter \"@devforge/*\" build && pnpm --filter devforge-frontend build",
+  "outputDirectory": ".next",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://backend-production-a449.up.railway.app/api/:path*"
+    }
+  ]
+}
