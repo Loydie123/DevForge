@@ -8,10 +8,23 @@ import { EventBusService } from './event-bus/event-bus.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
 
+import { execSync } from 'child_process';
+
 console.log('[Bootstrap] Starting backend bootstrap process...');
 
 async function bootstrap() {
   console.log('[Bootstrap] NestJS bootstrap function initiated...');
+
+  // Run database migrations programmatically on startup
+  try {
+    console.log('[Bootstrap] Running database migrations...');
+    execSync('npx prisma migrate deploy --schema=prisma/schema.prisma', { stdio: 'inherit' });
+    console.log('[Bootstrap] Database migrations completed successfully.');
+  } catch (error) {
+    console.error('[Bootstrap] Database migrations failed:', error);
+    process.exit(1);
+  }
+
   const app = await NestFactory.create(AppModule);
 
   // ── Security headers ────────────────────────────────────────────────────────
