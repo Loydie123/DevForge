@@ -25,7 +25,8 @@ async function bootstrap() {
     // Check if database needs seeding
     const prisma = new PrismaClient();
     const userCount = await prisma.user.count();
-    if (userCount === 0) {
+    // Seed only in development — never auto-create default admin in production
+    if (userCount === 0 && process.env.NODE_ENV !== 'production') {
       console.log('[Bootstrap] Database is empty. Running database seed...');
       execSync('npx prisma db seed', { stdio: 'inherit' });
       console.log('[Bootstrap] Database seeding completed successfully.');
@@ -82,8 +83,9 @@ async function bootstrap() {
   // ── Global exception filter ──────────────────────────────────────────────────
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // ── Swagger / OpenAPI ────────────────────────────────────────────────────────
-  const swaggerConfig = new DocumentBuilder()
+  // ── Swagger / OpenAPI (development only) ────────────────────────────────────
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
     .setTitle('DevForge API')
     .setDescription(
       'Universal Developer Operating System — REST API documentation.\n\n' +
@@ -119,7 +121,8 @@ async function bootstrap() {
       tryItOutEnabled: true, // enable "Try it out" by default
     },
     customSiteTitle: 'DevForge API Docs',
-  });
+    });
+  }
 
   const port = process.env.PORT ?? 4000;
   await app.listen(port, '0.0.0.0');

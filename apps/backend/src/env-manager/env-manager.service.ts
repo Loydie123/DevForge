@@ -249,7 +249,7 @@ export class EnvManagerService {
           'REDIS_URL',
           'redis://localhost:6379',
           'connection_string',
-          false,
+          true,
           'Redis cache',
         ),
         this.makeVar(
@@ -259,12 +259,12 @@ export class EnvManagerService {
           true,
           'JWT signing key',
         ),
-        this.makeVar('PORT', '4000', 'plain', false, 'Backend port'),
+        this.makeVar('PORT', '4000', 'plain', true, 'Backend port'),
         this.makeVar(
           'NODE_ENV',
           'development',
           'plain',
-          false,
+          true,
           'Runtime environment',
         ),
       ],
@@ -289,7 +289,7 @@ export class EnvManagerService {
           'REDIS_URL',
           'redis://staging-redis:6379',
           'connection_string',
-          false,
+          true,
           'Staging Redis',
         ),
         this.makeVar(
@@ -299,12 +299,12 @@ export class EnvManagerService {
           true,
           'JWT signing key',
         ),
-        this.makeVar('PORT', '4000', 'plain', false, 'Backend port'),
+        this.makeVar('PORT', '4000', 'plain', true, 'Backend port'),
         this.makeVar(
           'NODE_ENV',
           'staging',
           'plain',
-          false,
+          true,
           'Runtime environment',
         ),
         this.makeVar(
@@ -346,12 +346,12 @@ export class EnvManagerService {
           true,
           'JWT signing key',
         ),
-        this.makeVar('PORT', '4000', 'plain', false, 'Backend port'),
+        this.makeVar('PORT', '4000', 'plain', true, 'Backend port'),
         this.makeVar(
           'NODE_ENV',
           'production',
           'plain',
-          false,
+          true,
           'Runtime environment',
         ),
         this.makeVar(

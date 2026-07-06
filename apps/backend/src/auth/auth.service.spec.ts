@@ -103,7 +103,8 @@ describe('AuthService', () => {
       await service.register({
         email: 'hacker@test.com',
         password: 'password123',
-        role: 'admin',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- simulates attacker sending extra fields
+        ...( { role: 'admin' } as any ),
       });
 
       const createCall = mockPrisma.user.create.mock.calls[0][0];

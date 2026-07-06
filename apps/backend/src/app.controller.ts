@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, NotFoundException } from '@nestjs/common';
 import { AppService } from './app.service';
 import { EventBusService } from './event-bus/event-bus.service';
 import { DevForgeEvents, LogPayload, MetricPayload } from '@devforge/event-bus';
@@ -28,6 +28,10 @@ export class AppController {
 
   @Get('trigger-mock')
   triggerMock() {
+    if (process.env.NODE_ENV === 'production') {
+      throw new NotFoundException();
+    }
+
     const mockLog: LogPayload = {
       service: 'api-gateway',
       level: 'info',
