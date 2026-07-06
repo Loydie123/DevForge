@@ -7,6 +7,10 @@ import { EventBusLogger } from './event-bus/event-bus-logger';
 import { EventBusService } from './event-bus/event-bus.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
+import {
+  isSwaggerPath,
+  swaggerBasicAuth,
+} from './common/middleware/swagger-auth.middleware';
 import { PrismaClient } from '@prisma/client';
 
 import { execSync } from 'child_process';
@@ -83,8 +87,22 @@ async function bootstrap() {
   // ── Global exception filter ──────────────────────────────────────────────────
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // ── Swagger / OpenAPI (development only) ────────────────────────────────────
-  if (process.env.NODE_ENV !== 'production') {
+  // ── Swagger / OpenAPI ────────────────────────────────────────────────────────
+  const isProd = process.env.NODE_ENV === 'production';
+  const swaggerUser = process.env.SWAGGER_USER;
+  const swaggerPass = process.env.SWAGGER_PASSWORD;
+  const enableSwagger = !isProd || (Boolean(swaggerUser) && Boolean(swaggerPass));
+
+  if (enableSwagger) {
+    if (isProd && swaggerUser && swaggerPass) {
+      const auth = swaggerBasicAuth(swaggerUser, swaggerPass);
+      app.use((req, res, next) => {
+        if (isSwaggerPath(req.path)) auth(req, res, next);
+        else next();
+      });
+      console.log('[Swagger] Protected with basic auth (production)');
+    }
+
     const swaggerConfig = new DocumentBuilder()
     .setTitle('DevForge API')
     .setDescription(
@@ -112,16 +130,18 @@ async function bootstrap() {
     .addTag('admin', 'Admin Panel — User and system management')
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true, // remember token across refreshes
-      docExpansion: 'none', // collapse all by default for readability
-      filter: true, // show search bar
-      tryItOutEnabled: true, // enable "Try it out" by default
-    },
-    customSiteTitle: 'DevForge API Docs',
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        docExpansion: 'none',
+        filter: true,
+        tryItOutEnabled: true,
+      },
+      customSiteTitle: 'DevForge API Docs',
     });
+  } else if (isProd) {
+    console.log('[Swagger] Disabled — set SWAGGER_USER and SWAGGER_PASSWORD to enable');
   }
 
   const port = process.env.PORT ?? 4000;
