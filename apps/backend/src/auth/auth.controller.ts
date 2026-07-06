@@ -50,7 +50,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Login and receive a JWT token' })
   @ApiBody({
-    schema: { example: { email: 'admin@devforge.com', password: 'admin123' } },
+    schema: { example: { email: 'user@example.com', password: 'your-password' } },
   })
   @Throttle({ short: { ttl: 60_000, limit: 10 } }) // 10 login attempts/min per IP
   @Post('login')

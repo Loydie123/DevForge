@@ -30,7 +30,7 @@ pnpm dev
 
 > Frontend: http://localhost:3000 · Backend API: http://localhost:4000 · Health: http://localhost:4000/health
 
-**Default credentials:** `admin@devforge.com` / `admin123`
+> **Local dev only:** `npx prisma db seed` creates demo users. Change passwords before any shared/staging deploy. Default seed credentials are **not** used in production.
 
 ---
 
