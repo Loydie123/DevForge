@@ -22,3 +22,12 @@ export function swaggerBasicAuth(user: string, pass: string) {
 export function isSwaggerPath(path: string): boolean {
   return path === '/api/docs' || path.startsWith('/api/docs/') || path === '/api/docs-json';
 }
+
+/** Gate only Swagger routes; pass everything else through. */
+export function swaggerAuthGuard(user: string, pass: string) {
+  const auth = swaggerBasicAuth(user, pass);
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (isSwaggerPath(req.path)) auth(req, res, next);
+    else next();
+  };
+}

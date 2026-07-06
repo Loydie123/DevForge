@@ -8,8 +8,7 @@ import { EventBusService } from './event-bus/event-bus.service';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
 import {
-  isSwaggerPath,
-  swaggerBasicAuth,
+  swaggerAuthGuard,
 } from './common/middleware/swagger-auth.middleware';
 import { PrismaClient } from '@prisma/client';
 
@@ -95,11 +94,7 @@ async function bootstrap() {
 
   if (enableSwagger) {
     if (isProd && swaggerUser && swaggerPass) {
-      const auth = swaggerBasicAuth(swaggerUser, swaggerPass);
-      app.use((req, res, next) => {
-        if (isSwaggerPath(req.path)) auth(req, res, next);
-        else next();
-      });
+      app.use(swaggerAuthGuard(swaggerUser, swaggerPass));
       console.log('[Swagger] Protected with basic auth (production)');
     }
 
