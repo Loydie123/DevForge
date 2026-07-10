@@ -22,10 +22,11 @@ describe('EnvManagerService', () => {
         {
           key: 'DB_PASSWORD',
           value: 'super-secret',
+          type: 'secret',
           masked: true,
           description: '',
         },
-        { key: 'APP_NAME', value: 'DevForge', masked: false, description: '' },
+        { key: 'APP_NAME', value: 'DevForge', type: 'plain', masked: false, description: '' },
       ]);
 
       expect(result.name).toBe('API Keys');
@@ -87,6 +88,7 @@ describe('EnvManagerService', () => {
         {
           key: 'JWT_SECRET',
           value: 'very-secret-value',
+          type: 'secret',
           masked: true,
           description: '',
         },
@@ -103,6 +105,7 @@ describe('EnvManagerService', () => {
         {
           key: 'JWT_SECRET',
           value: 'very-secret-value',
+          type: 'secret',
           masked: true,
           description: '',
         },
@@ -118,6 +121,7 @@ describe('EnvManagerService', () => {
         {
           key: 'JWT_SECRET',
           value: 'very-secret-value',
+          type: 'secret',
           masked: true,
           description: '',
         },
@@ -138,6 +142,7 @@ describe('EnvManagerService', () => {
       const updated = service.addVariable(cfg.id, {
         key: 'NEW_VAR',
         value: 'hello',
+        type: 'plain',
         masked: false,
         description: '',
       });
@@ -149,7 +154,7 @@ describe('EnvManagerService', () => {
   describe('deleteVariable()', () => {
     it('should remove variable and bump version', () => {
       const cfg = service.createConfig('Test', 'development', [
-        { key: 'TO_DELETE', value: 'bye', masked: false, description: '' },
+        { key: 'TO_DELETE', value: 'bye', type: 'plain', masked: false, description: '' },
       ]);
       const varId = service.listConfigs()[0].variables[0].id;
       const updated = service.deleteVariable(cfg.id, varId);
@@ -163,7 +168,7 @@ describe('EnvManagerService', () => {
   describe('restoreVersion()', () => {
     it('should restore config to a previous snapshot', () => {
       const cfg = service.createConfig('Versioned', 'staging', [
-        { key: 'API_KEY', value: 'v1-key', masked: true, description: '' },
+        { key: 'API_KEY', value: 'v1-key', type: 'secret', masked: true, description: '' },
       ]);
 
       // Add snapshot at v1
@@ -190,10 +195,11 @@ describe('EnvManagerService', () => {
         {
           key: 'DB_URL',
           value: 'postgres://localhost/dev',
+          type: 'plain',
           masked: false,
           description: 'Database',
         },
-        { key: 'SECRET', value: 'my-secret', masked: true, description: '' },
+        { key: 'SECRET', value: 'my-secret', type: 'secret', masked: true, description: '' },
       ]);
       const output = service.exportDotEnv(cfg.id);
       expect(output).toContain('DB_URL=postgres://localhost/dev');
@@ -210,11 +216,11 @@ describe('EnvManagerService', () => {
   describe('getStats()', () => {
     it('should count configs, variables, and secrets accurately', () => {
       service.createConfig('Dev', 'development', [
-        { key: 'A', value: '1', masked: false, description: '' },
-        { key: 'B', value: '2', masked: true, description: '' },
+        { key: 'A', value: '1', type: 'plain', masked: false, description: '' },
+        { key: 'B', value: '2', type: 'secret', masked: true, description: '' },
       ]);
       service.createConfig('Prod', 'production', [
-        { key: 'C', value: '3', masked: true, description: '' },
+        { key: 'C', value: '3', type: 'secret', masked: true, description: '' },
       ]);
 
       const stats = service.getStats();

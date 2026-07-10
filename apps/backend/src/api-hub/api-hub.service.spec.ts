@@ -6,7 +6,7 @@ import { EventBusService } from '../event-bus/event-bus.service';
 import axios from 'axios';
 
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedAxios = jest.mocked(axios);
 
 const mockPrisma = {
   history: {
