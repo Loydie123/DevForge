@@ -92,7 +92,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to staging via SSH
-        if: ${{ secrets.STAGING_HOST != '' }}
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+        if: env.STAGING_HOST != ''
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.STAGING_HOST }}
@@ -115,7 +117,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to production via SSH
-        if: ${{ secrets.PROD_HOST != '' }}
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        if: env.PROD_HOST != ''
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.PROD_HOST }}
