@@ -3,7 +3,7 @@
 # Or via docker-compose.full.yml which sets context to ../../ (repo root)
 
 # ─── Dependencies Stage ───────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 
 RUN npm install -g pnpm
@@ -14,7 +14,7 @@ COPY apps/frontend/package.json ./apps/frontend/
 RUN pnpm install --frozen-lockfile
 
 # ─── Build Stage ──────────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 RUN npm install -g pnpm
@@ -29,7 +29,7 @@ WORKDIR /app/apps/frontend
 RUN DOCKER_BUILD=1 pnpm build
 
 # ─── Production Stage ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 WORKDIR /app
 
 ENV NODE_ENV=production
