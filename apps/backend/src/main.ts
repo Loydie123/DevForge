@@ -142,6 +142,6 @@ async function bootstrap() {
   const port = process.env.PORT ?? 4000;
   await app.listen(port, '0.0.0.0');
   console.log(`[Bootstrap] Backend is successfully listening on port ${port} (0.0.0.0)`);
-}
+} // Trigger Railway rebuild
 
 void bootstrap();
