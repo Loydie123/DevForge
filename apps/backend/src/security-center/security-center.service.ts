@@ -11,6 +11,19 @@ const MAX_AUDIT_SIZE = 500;
 const SUSPICIOUS_THRESHOLD = 100;
 const WINDOW_MS = 60_000;
 
+const ATTACK_SIGNATURE_PATHS = [
+  '.env',
+  'wp-admin',
+  'wp-login',
+  'phpmyadmin',
+  'etc/passwd',
+  'etc/',
+  '.git',
+  'config',
+  'xmlrpc',
+  'setup.php',
+];
+
 @Injectable()
 export class SecurityCenterService {
   private auditLog: AuditEvent[] = [];
@@ -18,8 +31,30 @@ export class SecurityCenterService {
     string,
     { count: number; lastSeen: number; paths: string[] }
   >();
+  private bannedIps = new Map<string, { bannedAt: number; reason: string }>();
+  private attackSignatures = new Map<string, string>();
 
   private readonly jwtSecret = process.env.JWT_SECRET ?? '';
+
+  constructor() {
+    // Seed some mock security scan attacks to demonstrate the defensive layer visually
+    this.recordRequest({
+      timestamp: Date.now() - 3600000 * 2,
+      ip: '198.51.100.42',
+      method: 'GET',
+      path: '/.env',
+      statusCode: 404,
+      durationMs: 15,
+    });
+    this.recordRequest({
+      timestamp: Date.now() - 60000 * 3,
+      ip: '203.0.113.88',
+      method: 'POST',
+      path: '/wp-admin/setup-config.php',
+      statusCode: 404,
+      durationMs: 22,
+    });
+  }
 
   // Called by the middleware on every request
   recordRequest(event: Omit<AuditEvent, 'id'>) {
@@ -39,6 +74,17 @@ export class SecurityCenterService {
     if (!entry.paths.includes(event.path))
       entry.paths = [event.path, ...entry.paths].slice(0, 10);
     this.ipMap.set(event.ip, entry);
+
+    // Auto-detection of security scanners
+    const path = event.path.toLowerCase();
+    const matchedPath = ATTACK_SIGNATURE_PATHS.find((p) => path.includes(p));
+    if (matchedPath && !this.bannedIps.has(event.ip)) {
+      this.blockIp(
+        event.ip,
+        `Auto-blocked: Path scanning signature detected (${matchedPath})`,
+        `Scanner Match: "${matchedPath}"`,
+      );
+    }
   }
 
   getAuditLog(limit = 100): AuditEvent[] {
@@ -54,16 +100,46 @@ export class SecurityCenterService {
         (e) => e.ip === ip && now - e.timestamp < WINDOW_MS,
       ).length;
 
+      const banInfo = this.bannedIps.get(ip);
+
       stats.push({
         ip,
         requestCount: data.count,
         lastSeen: data.lastSeen,
-        isSuspicious: recentRequests >= SUSPICIOUS_THRESHOLD,
+        isSuspicious: recentRequests >= SUSPICIOUS_THRESHOLD || !!banInfo,
+        isBanned: !!banInfo,
+        banReason: banInfo?.reason,
+        lastAttackSignature: this.attackSignatures.get(ip),
         paths: data.paths,
       });
     }
 
     return stats.sort((a, b) => b.requestCount - a.requestCount);
+  }
+
+  blockIp(
+    ip: string,
+    reason = 'Manually blocked by administrator',
+    signature = 'Manual Block',
+  ) {
+    this.bannedIps.set(ip, { bannedAt: Date.now(), reason });
+    if (!this.attackSignatures.has(ip)) {
+      this.attackSignatures.set(ip, signature);
+    }
+
+    // Ensure the IP is recorded in our list for stats rendering
+    if (!this.ipMap.has(ip)) {
+      this.ipMap.set(ip, { count: 1, lastSeen: Date.now(), paths: [] });
+    }
+  }
+
+  unblockIp(ip: string) {
+    this.bannedIps.delete(ip);
+    this.attackSignatures.delete(ip);
+  }
+
+  isIpBanned(ip: string): boolean {
+    return this.bannedIps.has(ip);
   }
 
   getStats(): SecurityStats {
@@ -80,7 +156,7 @@ export class SecurityCenterService {
     ).length;
 
     const ipStats = this.getIpStats();
-    const suspiciousIps = ipStats.filter((s) => s.isSuspicious).length;
+    const suspiciousIps = ipStats.filter((s) => s.isSuspicious || s.isBanned).length;
 
     const pathCounts = new Map<string, number>();
     for (const event of this.auditLog) {

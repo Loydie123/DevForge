@@ -64,7 +64,12 @@ export default function SecurityCenter() {
           <AuditLogPanel events={ctx.auditLog} isLoading={ctx.isLoadingAudit} />
         )}
         {ctx.activeTab === "ip-monitor" && (
-          <IpMonitorPanel ipStats={ctx.ipStats} isLoading={ctx.isLoadingIps} />
+          <IpMonitorPanel
+            ipStats={ctx.ipStats}
+            isLoading={ctx.isLoadingIps}
+            onBlock={ctx.blockIp}
+            onUnblock={ctx.unblockIp}
+          />
         )}
         {ctx.activeTab === "jwt-inspector" && (
           <JwtInspectorPanel

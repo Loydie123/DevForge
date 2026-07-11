@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   securityCenterService,
   JwtInspectResult,
@@ -13,6 +13,7 @@ export type ActiveTab = "overview" | "audit-log" | "ip-monitor" | "jwt-inspector
 export default function useSecurityCenter() {
   const { user, isAuthLoading } = useWorkspace();
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
+  const queryClient = useQueryClient();
 
   // JWT Inspector
   const [jwtInput, setJwtInput] = useState("");
@@ -45,6 +46,23 @@ export default function useSecurityCenter() {
     onSuccess: (data) => setJwtResult(data),
   });
 
+  const blockIpMutation = useMutation({
+    mutationFn: ({ ip, reason }: { ip: string; reason?: string }) =>
+      securityCenterService.blockIp(ip, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["security-ip-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["security-stats"] });
+    },
+  });
+
+  const unblockIpMutation = useMutation({
+    mutationFn: (ip: string) => securityCenterService.unblockIp(ip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["security-ip-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["security-stats"] });
+    },
+  });
+
   const handleInspect = () => {
     if (!jwtInput.trim()) return;
     setJwtResult(null);
@@ -70,5 +88,9 @@ export default function useSecurityCenter() {
     handleInspect,
     isInspecting: inspectMutation.isPending,
     inspectError: inspectMutation.error as Error | null,
+    blockIp: (ip: string, reason?: string) => blockIpMutation.mutate({ ip, reason }),
+    unblockIp: (ip: string) => unblockIpMutation.mutate(ip),
+    isBlockingIp: blockIpMutation.isPending,
+    isUnblockingIp: unblockIpMutation.isPending,
   };
 }

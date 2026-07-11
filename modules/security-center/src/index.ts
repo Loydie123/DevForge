@@ -15,6 +15,9 @@ export interface IpStat {
   requestCount: number;
   lastSeen: number;
   isSuspicious: boolean;
+  isBanned: boolean;
+  banReason?: string;
+  lastAttackSignature?: string;
   paths: string[];
 }
 

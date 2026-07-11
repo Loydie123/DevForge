@@ -17,6 +17,9 @@ export interface IpStat {
   requestCount: number;
   lastSeen: number;
   isSuspicious: boolean;
+  isBanned: boolean;
+  banReason?: string;
+  lastAttackSignature?: string;
   paths: string[];
 }
 
@@ -57,5 +60,13 @@ export const securityCenterService = {
   async inspectJwt(token: string, verify = false): Promise<JwtInspectResult> {
     const res = await apiClient.post<JwtInspectResult>("/security/jwt/inspect", { token, verify });
     return res.data;
+  },
+
+  async blockIp(ip: string, reason?: string): Promise<void> {
+    await apiClient.post("/security/ips/block", { ip, reason });
+  },
+
+  async unblockIp(ip: string): Promise<void> {
+    await apiClient.post("/security/ips/unblock", { ip });
   },
 };

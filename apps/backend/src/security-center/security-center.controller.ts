@@ -30,4 +30,14 @@ export class SecurityCenterController {
   inspectJwt(@Body() dto: JwtInspectDto) {
     return this.security.inspectJwt(dto.token, dto.verify);
   }
+
+  @Post('ips/block')
+  blockIp(@Body() body: { ip: string; reason?: string }) {
+    return this.security.blockIp(body.ip, body.reason);
+  }
+
+  @Post('ips/unblock')
+  unblockIp(@Body() body: { ip: string }) {
+    return this.security.unblockIp(body.ip);
+  }
 }
